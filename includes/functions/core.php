@@ -16,10 +16,27 @@ function setup() {
 
 	add_action( 'init', $n( 'i18n' ) );
 	add_action( 'init', $n( 'init' ) );
+	add_filter( 'wp_stream_db_driver', $n( 'driver' ) );
 
 	do_action( 'EPStream_loaded' );
 }
 
+/**
+ * @param $default_driver
+ *
+ * @return string
+ */
+function driver( $default_driver ) {
+
+	if ( interface_exists( '\WP_Stream\DB_Driver' ) ) {
+		require_once EPSTREAM_INC . 'classes/class-query.php';
+		require_once EPSTREAM_INC . 'classes/class-db-driver-elasticpress.php';
+		return 'ElasticPress\Stream\Driver\DB_Driver_ElasticPress';
+	}
+
+	return $default_driver;
+
+}
 /**
  * Registers the default textdomain.
  *
@@ -71,4 +88,15 @@ function activate() {
  */
 function deactivate() {
 
+}
+
+
+/**
+ * Show admin notice if elasticPress plugin is not present
+ */
+function no_ep_notice() {
+	$class   = 'notice notice-error';
+	$message = __( 'Please install and configure ElasticPress plugin to use ElasticPress Stream Connector', 'EPStream' );
+
+	printf( '<div class="%1$s"><p>%2$s</p></div>', $class, $message );
 }

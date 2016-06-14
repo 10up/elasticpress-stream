@@ -37,17 +37,39 @@
 
 // Useful global constants
 define( 'EPSTREAM_VERSION', '0.1.0' );
-define( 'EPSTREAM_URL',     plugin_dir_url( __FILE__ ) );
-define( 'EPSTREAM_PATH',    dirname( __FILE__ ) . '/' );
-define( 'EPSTREAM_INC',     EPSTREAM_PATH . 'includes/' );
+define( 'EPSTREAM_URL', plugin_dir_url( __FILE__ ) );
+define( 'EPSTREAM_PATH', dirname( __FILE__ ) . '/' );
+define( 'EPSTREAM_INC', EPSTREAM_PATH . 'includes/' );
 
-// Include files
+
+// Include core file
 require_once EPSTREAM_INC . 'functions/core.php';
 
+
+add_action( 'plugins_loaded', 'ep_stream_loader', 5 );
+/**
+ * Only load plugin if ElasticPress is present
+ */
+function ep_stream_loader() {
+	//If ElasticPress config class is not present
+	if ( false === class_exists( 'EP_Config' ) ) {
+		//Show admin notice
+		add_action( 'admin_notices', 'ElasticPress\Stream\Core\no_ep_notice' );
+
+		return;
+	}
+	if ( true !== ep_check_host() ) {
+		return;
+	}
+
+	// Include all required file
+
+	// Bootstrap
+	ElasticPress\Stream\Core\setup();
+
+}
 
 // Activation/Deactivation
 register_activation_hook( __FILE__, '\ElasticPress\Stream\Core\activate' );
 register_deactivation_hook( __FILE__, '\ElasticPress\Stream\Core\deactivate' );
 
-// Bootstrap
-ElasticPress\Stream\Core\setup();
