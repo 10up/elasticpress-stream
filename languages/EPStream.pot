@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: Steam ElasticPress Connector\n"
+"Project-Id-Version: Stream ElasticPress Connector\n"
 "POT-Creation-Date: 2016-06-10T17:02:11.618Z\n"
 "PO-Revision-Date: 2016-06-10T17:02:11.618Z\n"
 "Last-Translator: Faishal Saiyed <faishal@10up.com>\n"

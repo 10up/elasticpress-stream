@@ -1,4 +1,4 @@
-=== Steam ElasticPress Connector ===
+=== Stream ElasticPress Connector ===
 Contributors:      Faishal Saiyed
 Donate link:       http://10up.com
 Tags: 
@@ -19,7 +19,7 @@ Stream ElasticPress Connector
 = Manual Installation =
 
 1. Upload the entire `/elasticpress-stream` directory to the `/wp-content/plugins/` directory.
-2. Activate Steam ElasticPress Connector through the 'Plugins' menu in WordPress.
+2. Activate Stream ElasticPress Connector through the 'Plugins' menu in WordPress.
 
 == Frequently Asked Questions ==
 

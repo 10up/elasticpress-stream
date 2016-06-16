@@ -1,5 +1,5 @@
 {
-	"name": "steam-elasticpress-connector",
+	"name": "Stream-elasticpress-connector",
 	"description": "Stream ElasticPress Connector",
 	"version": "0.1.0",
 	"type": "wordpress-plugin",

@@ -1,6 +1,6 @@
 <?php
 
-namespace ElastcPress\SteamElasticPress_Connector;
+namespace ElastcPress\StreamElasticPress_Connector;
 
 use PHPUnit_Framework_TestResult;
 use Text_Template;

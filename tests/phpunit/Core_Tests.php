@@ -1,5 +1,5 @@
 <?php
-namespace ElastcPress\SteamElasticPress_Connector\Core;
+namespace ElastcPress\StreamElasticPress_Connector\Core;
 
 /**
  * This is a very basic test case to get things started. You should probably rename this and make
@@ -13,7 +13,7 @@ namespace ElastcPress\SteamElasticPress_Connector\Core;
  *   - https://github.com/10up/wp_mock
  */
 
-use ElastcPress\SteamElasticPress_Connector as Base;
+use ElastcPress\StreamElasticPress_Connector as Base;
 
 class Core_Tests extends Base\TestCase {
 
@@ -26,8 +26,8 @@ class Core_Tests extends Base\TestCase {
 	 */
 	public function test_setup() {
 		// Setup
-		\WP_Mock::expectActionAdded( 'init', 'ElastcPress\SteamElasticPress_Connector\Core\i18n' );
-		\WP_Mock::expectActionAdded( 'init', 'ElastcPress\SteamElasticPress_Connector\Core\init' );
+		\WP_Mock::expectActionAdded( 'init', 'ElastcPress\StreamElasticPress_Connector\Core\i18n' );
+		\WP_Mock::expectActionAdded( 'init', 'ElastcPress\StreamElasticPress_Connector\Core\init' );
 		\WP_Mock::expectAction( 'EPStream_loaded' );
 
 		// Act
