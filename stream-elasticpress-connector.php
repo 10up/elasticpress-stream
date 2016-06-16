@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: Steam ElasticPress Connector
+ * Plugin Name: Stream ElasticPress Connector
  * Plugin URI:  http://10up.com
  * Description: Stream ElasticPress Connector
  * Version:     0.1.0
