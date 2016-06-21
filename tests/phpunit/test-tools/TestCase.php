@@ -1,6 +1,6 @@
 <?php
 
-namespace ElastcPress\StreamElasticPress_Connector;
+namespace ElasticPress\Stream\Core;
 
 use PHPUnit_Framework_TestResult;
 use Text_Template;
