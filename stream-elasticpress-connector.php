@@ -43,6 +43,7 @@ define( 'EPSTREAM_INC', EPSTREAM_PATH . 'includes/' );
 
 
 // Include core file
+require_once EPSTREAM_INC . 'functions/template.php';
 require_once EPSTREAM_INC . 'functions/core.php';
 
 

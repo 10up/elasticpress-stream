@@ -13,21 +13,14 @@ class DB_Driver_ElasticPress implements \WP_Stream\DB_Driver {
 	 *
 	 * @var string
 	 */
-	public $table;
-
-	/**
-	 * Hold meta table name
-	 *
-	 * @var string
-	 */
-	public $table_meta;
+	public $index_name;
 
 	/**
 	 * Class constructor.
 	 */
 	public function __construct() {
-		$this->query = new Query( $this );
-		// @TODO: Implement method and make sure it is returning expected data same as DB_Driver_WPDB
+		$this->query      = new Query( $this );
+		$this->index_name = trailingslashit( \ep_stream_get_index_name() );
 	}
 
 	/**
@@ -38,22 +31,83 @@ class DB_Driver_ElasticPress implements \WP_Stream\DB_Driver {
 	 * @return int
 	 */
 	public function insert_record( $data ) {
-		// @TODO: Implement method and make sure it is returning expected data same as DB_Driver_WPDB
+		//Return if importing
+		if ( defined( 'WP_IMPORTING' ) && WP_IMPORTING ) {
+			return false;
+		}
+
+		$meta         = $data['meta'];
+		$data['meta'] = array();
+
+		$created_date    = new \DateTime( $data['created'] );
+		$data['created'] = $created_date->format( 'Y-m-d H:i:s' );
+		// Insert record meta
+		foreach ( (array) $meta as $meta_key => $meta_values ) {
+			$data['meta'][ $meta_key ] = \EP_API::factory()->prepare_meta_value_types( $meta_values );
+
+		}
+		$record_id = $this->index_record( $data );
+
 		return $record_id;
 	}
 
 	/**
-	 * Insert record meta
+	 * Index record in elasticSearch
 	 *
-	 * @param int $record_id
-	 * @param string $key
-	 * @param string $val
+	 * @param $record
+	 * @param bool $blocking
 	 *
-	 * @return array
+	 * @return bool
 	 */
-	public function insert_meta( $record_id, $key, $val ) {
-		// @TODO: Implement method and make sure it is returning expected data same as DB_Driver_WPDB
-		return $result;
+	function index_record( $record, $blocking = true ) {
+
+		/**
+		 * Filter post prior to indexing
+		 *
+		 * Allows for last minute indexing of post information.
+		 *
+		 * @since 1.7
+		 *
+		 * @param         array Array of post information to index.
+		 */
+		$record = apply_filters( 'ep_stream_pre_index_record', $record );
+
+
+		$path = $this->index_name . 'record';
+
+		if ( function_exists( 'wp_json_encode' ) ) {
+
+			$encoded_post = wp_json_encode( $record );
+
+		} else {
+
+			$encoded_post = json_encode( $record );
+
+		}
+
+
+		$request_args = array(
+			'body'     => $encoded_post,
+			'method'   => 'POST',
+			'timeout'  => 15,
+			'blocking' => $blocking,
+		);
+
+		$request = ep_remote_request( $path, apply_filters( 'ep_index_post_request_args', $request_args, $record ) );
+
+		do_action( 'ep_index_post_retrieve_raw_response', $request, $record, $path );
+
+		if ( ! is_wp_error( $request ) ) {
+			$response_body = wp_remote_retrieve_body( $request );
+
+			$response = json_decode( $response_body );
+
+			if ( $response->_id ) {
+				return $response->_id;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -64,7 +118,6 @@ class DB_Driver_ElasticPress implements \WP_Stream\DB_Driver {
 	 * @return array
 	 */
 	public function get_records( $args ) {
-		// @TODO: Implement method and make sure it is returning expected data same as DB_Driver_WPDB
 		return $this->query->query( $args );
 	}
 
