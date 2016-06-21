@@ -1,0 +1,27 @@
+{
+	"name": "Stream-elasticpress-connector",
+	"description": "Stream ElasticPress Connector",
+	"version": "0.1.0",
+	"type": "wordpress-plugin",
+	"keywords": [],
+	"homepage": "http://10up.com",
+	"license": "GPL-2.0+",
+	"authors": [
+		{
+			"name": "Faishal Saiyed",
+			"email": "faishal@10up.com",
+		"homepage": "Faishal Saiyed",
+			"role": "Developer"
+		}
+	],
+    "minimum-stability": "dev",
+	"require": {
+		"php": ">=5.6"
+	},
+    "require-dev": {
+	    "antecedent/patchwork": "1.2.*",
+        "phpunit/phpunit"     : "*@stable",
+	    "brianium/paratest"   : "dev-master",
+        "10up/wp_mock"        : "dev-master"
+    }
+}
