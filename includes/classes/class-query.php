@@ -16,8 +16,10 @@ class Query {
 	 * @return array Stream Records
 	 */
 	public function query( $args ) {
-		$result = array();
-		//pagination
+
+		/**
+		 * PARSE PAGINATION PARAMS
+		 */
 		$from = 0;
 		if ( isset( $args['paged'] ) ) {
 			$from = ( absint( $args['paged'] ) - 1 ) * absint( $args['records_per_page'] );
@@ -165,6 +167,90 @@ class Query {
 			$filter['and'][] = array( 'range' => $range );
 		}
 
+
+		/**
+		 * PARSE __IN PARAM FAMILY
+		 */
+		$ins = array();
+
+		foreach ( $args as $arg => $value ) {
+			if ( '__in' === substr( $arg, - 4 ) ) {
+				$ins[ $arg ] = $value;
+			}
+		}
+
+		if ( ! empty( $ins ) ) {
+			$in_filter = array();
+			foreach ( $ins as $key => $value ) {
+				if ( empty( $value ) || ! is_array( $value ) ) {
+					continue;
+				}
+
+				$field = str_replace( array( 'record_', '__in' ), '', $key );
+				$field = empty( $field ) ? 'ID' : $field;
+
+				if ( ! empty( $value ) ) {
+					$not_filter[] = array( 'terms' => array( $field => $value ) );
+				}
+			}
+			if ( false === empty( $in_filter ) ) {
+
+				if ( false === isset( $formatted_args['query'] ) ) {
+					$formatted_args['query'] = array();
+				}
+
+				if ( false === isset( $formatted_args['query']['bool'] ) ) {
+					$formatted_args['query']['bool'] = array();
+				}
+				if ( false === isset( $formatted_args['query']['bool']['filter'] ) ) {
+					$formatted_args['query']['bool']['filter'] = array();
+				}
+				$formatted_args['query']['bool']['filter'] = $in_filter;
+			}
+		}
+
+		/**
+		 * PARSE __NOT_IN PARAM FAMILY
+		 */
+		$not_ins = array();
+
+		foreach ( $args as $arg => $value ) {
+			if ( '__not_in' === substr( $arg, - 8 ) ) {
+				$not_ins[ $arg ] = $value;
+			}
+		}
+
+		if ( ! empty( $not_ins ) ) {
+			$not_filter = array();
+			foreach ( $not_ins as $key => $value ) {
+				if ( empty( $value ) || ! is_array( $value ) ) {
+					continue;
+				}
+
+				$field = str_replace( array( 'record_', '__not_in' ), '', $key );
+				$field = empty( $field ) ? 'ID' : $field;
+
+				if ( ! empty( $value ) ) {
+					$not_filter[] = array( 'terms' => array( $field => $value ) );
+				}
+			}
+			//$formatted_args['query']['bool']['must_not']
+			if ( false === empty( $not_filter ) ) {
+
+				if ( false === isset( $formatted_args['query'] ) ) {
+					$formatted_args['query'] = array();
+				}
+
+				if ( false === isset( $formatted_args['query']['bool'] ) ) {
+					$formatted_args['query']['bool'] = array();
+				}
+				if ( false === isset( $formatted_args['query']['bool']['must_not'] ) ) {
+					$formatted_args['query']['bool']['must_not'] = array();
+				}
+				$formatted_args['query']['bool']['must_not'] = $not_filter;
+			}
+		}
+
 		/**
 		 * PARSE ORDER PARAMS
 		 */
@@ -197,6 +283,29 @@ class Query {
 			$orderby => array( 'order' => $order )
 		);
 
+		/**
+		 * PARSE FIELDS PARAMETER
+		 */
+
+		$fields = (array) $args['fields'];
+
+
+		if ( ! empty( $fields ) ) {
+			$selects = array();
+			foreach ( $fields as $field ) {
+				// We'll query the meta table later
+				if ( 'meta' === $field ) {
+					continue;
+				}
+
+				$selects[] = $field;
+			}
+			if ( false === empty( $selects ) ) {
+				$formatted_args['_source'] = $selects;
+			}
+		}
+
+
 		if ( ! empty( $filter['and'] ) ) {
 			$formatted_args['filter'] = $filter;
 		}
@@ -208,6 +317,7 @@ class Query {
 
 	/**
 	 * Search record from elasticSearch
+	 *
 	 * @param $formatted_args
 	 *
 	 * @return array
@@ -233,25 +343,26 @@ class Query {
 
 			$hits            = $response['hits']['hits'];
 			$result['count'] = absint( $response['hits']['total'] );
-
 			foreach ( $hits as $record ) {
-				$recordObj = new \stdClass();
-				foreach ( $record ['_source'] as $key => $value ) {
-					$recordObj->$key = $value;
-				}
-				if ( isset( $recordObj->meta ) ) {
-					$new_meta = array();
-					foreach ( $recordObj->meta as $meta_key => $value ) {
-						if ( is_array( $value ) && $value[0] ) {
-							$value = array_pop( $value );
-						}
-						$new_meta[ $meta_key ] = maybe_unserialize( $value[0]['raw'] );
+				if ( isset( $record ['_source'] ) ) {
+					$recordObj = new \stdClass();
+					foreach ( $record ['_source'] as $key => $value ) {
+						$recordObj->$key = $value;
 					}
+					if ( isset( $recordObj->meta ) ) {
+						$new_meta = array();
+						foreach ( $recordObj->meta as $meta_key => $value ) {
+							if ( is_array( $value ) && $value[0] ) {
+								$value = array_pop( $value );
+							}
+							$new_meta[ $meta_key ] = maybe_unserialize( $value[0]['raw'] );
+						}
 
-					$recordObj->meta = $new_meta;
+						$recordObj->meta = $new_meta;
 
+					}
+					$result['items'][] = $recordObj;
 				}
-				$result['items'][] = $recordObj;
 			}
 
 
@@ -259,17 +370,5 @@ class Query {
 
 		return $result;
 
-	}
-
-	/**
-	 * Add meta to a set of records
-	 *
-	 * @param array $records
-	 *
-	 * @return array
-	 */
-	public function add_record_meta( $records ) {
-		// @TODO: Implement method and make sure it is returning expected data same as Stream Query class
-		return (array) $records;
 	}
 }

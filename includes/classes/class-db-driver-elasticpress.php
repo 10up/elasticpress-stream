@@ -133,7 +133,36 @@ class DB_Driver_ElasticPress implements \WP_Stream\DB_Driver {
 	 * @return array
 	 */
 	public function get_column_values( $column ) {
-		// @TODO: Implement method and make sure it is returning expected data same as DB_Driver_WPDB
+
+		$formatted_args = array(
+			'size' => 0,
+			'aggs' => array( 'group_by_column' => array( 'terms' => array( 'field' => $column, 'size' => 1000 ) ) )
+		);
+
+		$path = ep_stream_get_index_name() . '/record/_search';
+
+		$request_args = array(
+			'body'   => json_encode( $formatted_args ),
+			'method' => 'POST',
+		);
+
+		$request = ep_remote_request( $path, $request_args );
+		$result  = array();
+		if ( ! is_wp_error( $request ) ) {
+
+			$response_body = wp_remote_retrieve_body( $request );
+
+			$response = json_decode( $response_body, true );
+			if ( isset( $response['aggregations'] ) && isset( $response['aggregations']['group_by_column'] ) ) {
+				$buckets = $response['aggregations']['group_by_column']['buckets'];
+				foreach ( $buckets as $row ) {
+					$result[] = array( $column => $row['key'] );
+				}
+			}
+		}
+
+		return $result;
+
 	}
 
 	/**
