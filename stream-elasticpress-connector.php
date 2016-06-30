@@ -59,7 +59,7 @@ function ep_stream_loader() {
 
 		return;
 	}
-	if ( true !== ep_check_host() ) {
+	if ( true !== ep_stream_check_host() ) {
 		return;
 	}
 

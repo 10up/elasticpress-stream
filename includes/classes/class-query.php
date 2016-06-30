@@ -21,6 +21,11 @@ class Query {
 		 * PARSE PAGINATION PARAMS
 		 */
 		$from = 0;
+
+		if ( ! isset( $args['records_per_page'] ) ) {
+			$args['records_per_page'] = 20;
+		}
+
 		if ( isset( $args['paged'] ) ) {
 			$from = ( absint( $args['paged'] ) - 1 ) * absint( $args['records_per_page'] );
 		}
@@ -37,42 +42,38 @@ class Query {
 		/**
 		 * PARSE CORE PARAMS
 		 */
-
-		if ( is_numeric( $args['site_id'] ) ) {
-			$filter['and'][] = array( 'term' => array( 'site_id' => $args['site_id'] ) );
-		}
-
-		if ( is_numeric( $args['blog_id'] ) ) {
-			$filter['and'][] = array( 'term' => array( 'blog_id' => $args['blog_id'] ) );
-		}
-
-		if ( is_numeric( $args['object_id'] ) ) {
-			$filter['and'][] = array( 'term' => array( 'object_id' => $args['object_id'] ) );
-		}
-		if ( is_numeric( $args['user_id'] ) ) {
-			$filter['and'][] = array( 'term' => array( 'user_id' => $args['user_id'] ) );
-		}
-
-		if ( ! empty( $args['user_role'] ) ) {
-			$filter['and'][] = array( 'term' => array( 'user_role' => $args['user_role'] ) );
-		}
-
-		if ( ! empty( $args['connector'] ) ) {
-			$filter['and'][] = array( 'term' => array( 'connector' => $args['connector'] ) );
-		}
-
-		if ( ! empty( $args['context'] ) ) {
-			$filter['and'][] = array( 'term' => array( 'context' => $args['context'] ) );
-		}
-
-		if ( ! empty( $args['action'] ) ) {
-			$filter['and'][] = array( 'term' => array( 'action' => $args['action'] ) );
-		}
-
+		//Sanitize ip if set
 		if ( ! empty( $args['ip'] ) ) {
-			$filter['and'][] = array( 'term' => array( 'ip' => wp_stream_filter_var( $args['ip'], FILTER_VALIDATE_IP ) ) );
+			$args['ip'] = ep_stream_filter_var( $args['ip'], FILTER_VALIDATE_IP );
 		}
+		//Allowed field and validate function mapping
+		$allowed_and_args = array(
+			'site_id'   => 'is_numeric',
+			'blog_id'   => 'is_numeric',
+			'object_id' => 'is_numeric',
+			'user_id'   => 'is_numeric',
+			'user_role' => 'empty',
+			'connector' => 'empty',
+			'context'   => 'empty',
+			'action'    => 'empty',
+			'ip'        => 'empty',
+		);
 
+		foreach ( $allowed_and_args as $field => $validation_func ) {
+			if ( isset( $args[ $field ] ) ) {
+				if ( 'is_numeric' === $validation_func ) {
+					$is_valid = is_numeric( $args[ $field ] );
+				} else {
+					$is_valid = ! empty( $args[ $field ] );
+				}
+
+				if ( $is_valid ) {
+					$filter['and'][] = array(
+						'term' => array( $field => $args[ $field ] ),
+					);
+				}
+			}
+		}
 
 		if ( ! empty( $args['search'] ) ) {
 			$search_fields = array(
@@ -94,12 +95,12 @@ class Query {
 				$search_fields = array( $field );
 			}
 
-			$query = array(
+			$query                   = array(
 				'bool' => array(
 					'should' => array(
 						array(
 							'multi_match' => array(
-								'query'     => '',
+								'query'     => $args['search'],
 								'type'      => 'phrase',
 								'fields'    => $search_fields,
 								'boost'     => apply_filters( 'ep_match_phrase_boost', 4, $search_fields, $args ),
@@ -108,27 +109,17 @@ class Query {
 						),
 						array(
 							'multi_match' => array(
-								'query'     => '',
+								'query'     => $args['search'],
 								'fields'    => $search_fields,
 								'boost'     => apply_filters( 'ep_match_boost', 2, $search_fields, $args ),
 								'fuzziness' => 0,
 								'operator'  => 'and',
 							)
 						),
-						array(
-							'multi_match' => array(
-								'fields'    => $search_fields,
-								'query'     => '',
-								'fuzziness' => apply_filters( 'ep_fuzziness_arg', 1, $search_fields, $args ),
-							),
-						)
 					),
 				),
 			);
-
-			$query['bool']['should'][1]['multi_match']['query'] = $args['search'];
-			$query['bool']['should'][0]['multi_match']['query'] = $args['search'];
-			$formatted_args['query']                            = $query;
+			$formatted_args['query'] = $query;
 
 		}
 
@@ -169,10 +160,11 @@ class Query {
 
 
 		/**
-		 * PARSE __IN PARAM FAMILY
+		 * PARSE *__IN PARAM FAMILY
 		 */
 		$ins = array();
-
+		//This will extract all in query args from main args into $ins array
+		// e.g user_id__in,user_role__in,connector__in,ip__in,context__in,action__in,record__in
 		foreach ( $args as $arg => $value ) {
 			if ( '__in' === substr( $arg, - 4 ) ) {
 				$ins[ $arg ] = $value;
@@ -182,11 +174,13 @@ class Query {
 		if ( ! empty( $ins ) ) {
 			$in_filter = array();
 			foreach ( $ins as $key => $value ) {
+				//if query value is not an array then egnore
 				if ( empty( $value ) || ! is_array( $value ) ) {
 					continue;
 				}
-
+				//sanitize filed name : remove __in from filed name
 				$field = str_replace( array( 'record_', '__in' ), '', $key );
+				//if empty then use ID field
 				$field = empty( $field ) ? 'ID' : $field;
 
 				if ( ! empty( $value ) ) {
@@ -194,7 +188,6 @@ class Query {
 				}
 			}
 			if ( false === empty( $in_filter ) ) {
-
 				if ( false === isset( $formatted_args['query'] ) ) {
 					$formatted_args['query'] = array();
 				}
@@ -213,7 +206,7 @@ class Query {
 		 * PARSE __NOT_IN PARAM FAMILY
 		 */
 		$not_ins = array();
-
+		//Extract all __not_in query args from main query
 		foreach ( $args as $arg => $value ) {
 			if ( '__not_in' === substr( $arg, - 8 ) ) {
 				$not_ins[ $arg ] = $value;
@@ -226,7 +219,7 @@ class Query {
 				if ( empty( $value ) || ! is_array( $value ) ) {
 					continue;
 				}
-
+				//sanitize field name : remove __not_in from field
 				$field = str_replace( array( 'record_', '__not_in' ), '', $key );
 				$field = empty( $field ) ? 'ID' : $field;
 
@@ -234,9 +227,7 @@ class Query {
 					$not_filter[] = array( 'terms' => array( $field => $value ) );
 				}
 			}
-			//$formatted_args['query']['bool']['must_not']
 			if ( false === empty( $not_filter ) ) {
-
 				if ( false === isset( $formatted_args['query'] ) ) {
 					$formatted_args['query'] = array();
 				}
@@ -255,7 +246,7 @@ class Query {
 		 * PARSE ORDER PARAMS
 		 */
 		$order     = esc_sql( $args['order'] );
-		$orderby   = esc_sql( $args['orderby'] );
+		$orderby   = 'asc' === $args['orderby'] ? 'asc' : 'desc';
 		$orderable = array(
 			'ID',
 			'site_id',
@@ -323,14 +314,21 @@ class Query {
 	 * @return array
 	 */
 	function search( $formatted_args ) {
-		$path = ep_stream_get_index_name() . '/record/_search';
+
+		if ( is_network_admin() ) {
+			$index_name = trailingslashit( ep_stream_get_network_alias() );
+		} else {
+			$index_name = trailingslashit( ep_stream_get_index_name() );
+		}
+
+		$path = $index_name . 'record/_search';
 
 		$request_args = array(
 			'body'   => json_encode( $formatted_args ),
 			'method' => 'POST',
 		);
 
-		$request = ep_remote_request( $path, $request_args );
+		$request = ep_stream_remote_request( $path, $request_args );
 
 		$result = array( 'items' => array(), 'count' => 0 );
 
@@ -340,26 +338,30 @@ class Query {
 			$response_body = wp_remote_retrieve_body( $request );
 
 			$response = json_decode( $response_body, true );
+			if ( false === isset( $response['hits'] ) ) {
+				return $result;
+			}
+			if ( false === isset( $response['hits']['hits'] ) ) {
+				return $result;
+			}
 
 			$hits            = $response['hits']['hits'];
 			$result['count'] = absint( $response['hits']['total'] );
 			foreach ( $hits as $record ) {
 				if ( isset( $record ['_source'] ) ) {
-					$recordObj = new \stdClass();
-					foreach ( $record ['_source'] as $key => $value ) {
-						$recordObj->$key = $value;
-					}
+					$recordObj = (object) $record ['_source'];
 					if ( isset( $recordObj->meta ) ) {
 						$new_meta = array();
 						foreach ( $recordObj->meta as $meta_key => $value ) {
-							if ( is_array( $value ) && $value[0] ) {
+							if ( is_array( $value ) && ! isset( $value['raw'] ) ) {
 								$value = array_pop( $value );
 							}
-							$new_meta[ $meta_key ] = maybe_unserialize( $value[0]['raw'] );
+							if ( isset( $value['raw'] ) ) {
+								$new_meta[ $meta_key ] = maybe_unserialize( $value['raw'] );
+							}
 						}
 
 						$recordObj->meta = $new_meta;
-
 					}
 					$result['items'][] = $recordObj;
 				}

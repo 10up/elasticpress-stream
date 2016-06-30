@@ -33,17 +33,16 @@ class DB_Driver_ElasticPress implements \WP_Stream\DB_Driver {
 	public function insert_record( $data ) {
 		//Return if importing
 		if ( defined( 'WP_IMPORTING' ) && WP_IMPORTING ) {
-			return false;
+			return 0;
 		}
 
 		$meta         = $data['meta'];
 		$data['meta'] = array();
-
-		$created_date    = new \DateTime( $data['created'] );
-		$data['created'] = $created_date->format( 'Y-m-d H:i:s' );
+		//convert date in proper format
+		$data['created'] = date( 'Y-m-d H:i:s', strtotime( $data['created'] ) );
 		// Insert record meta
 		foreach ( (array) $meta as $meta_key => $meta_values ) {
-			$data['meta'][ $meta_key ] = \EP_API::factory()->prepare_meta_value_types( $meta_values );
+			$data['meta'][ $meta_key ] = ep_stream_prepare_meta_value_types( $meta_values );
 
 		}
 		$record_id = $this->index_record( $data );
@@ -62,40 +61,26 @@ class DB_Driver_ElasticPress implements \WP_Stream\DB_Driver {
 	function index_record( $record, $blocking = true ) {
 
 		/**
-		 * Filter post prior to indexing
+		 * Filter record prior to indexing
 		 *
-		 * Allows for last minute indexing of post information.
+		 * Allows for last minute indexing of stream record information.
 		 *
-		 * @since 1.7
 		 *
-		 * @param         array Array of post information to index.
+		 * @param         array Array of stream record information to index.
 		 */
 		$record = apply_filters( 'ep_stream_pre_index_record', $record );
 
 
 		$path = $this->index_name . 'record';
 
-		if ( function_exists( 'wp_json_encode' ) ) {
-
-			$encoded_post = wp_json_encode( $record );
-
-		} else {
-
-			$encoded_post = json_encode( $record );
-
-		}
-
-
 		$request_args = array(
-			'body'     => $encoded_post,
+			'body'     => ep_stream_json_encode( $record ),
 			'method'   => 'POST',
 			'timeout'  => 15,
 			'blocking' => $blocking,
 		);
 
-		$request = ep_remote_request( $path, apply_filters( 'ep_index_post_request_args', $request_args, $record ) );
-
-		do_action( 'ep_index_post_retrieve_raw_response', $request, $record, $path );
+		$request = ep_stream_remote_request( $path, $request_args );
 
 		if ( ! is_wp_error( $request ) ) {
 			$response_body = wp_remote_retrieve_body( $request );
@@ -142,11 +127,11 @@ class DB_Driver_ElasticPress implements \WP_Stream\DB_Driver {
 		$path = ep_stream_get_index_name() . '/record/_search';
 
 		$request_args = array(
-			'body'   => json_encode( $formatted_args ),
+			'body'   => ep_stream_json_encode( $formatted_args ),
 			'method' => 'POST',
 		);
 
-		$request = ep_remote_request( $path, $request_args );
+		$request = ep_stream_remote_request( $path, $request_args );
 		$result  = array();
 		if ( ! is_wp_error( $request ) ) {
 

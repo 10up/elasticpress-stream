@@ -17,6 +17,9 @@ function setup() {
 	add_action( 'init', $n( 'i18n' ) );
 	add_action( 'init', $n( 'init' ) );
 	add_filter( 'wp_stream_db_driver', $n( 'driver' ) );
+	add_action( 'ep_cli_put_mapping', $n( 'put_mapping' ) );
+	add_action( 'ep_put_mapping', $n( 'put_mapping' ) );
+	add_action( 'ep_create_network_alias', $n( 'create_network_alias' ) );
 
 	do_action( 'EPStream_loaded' );
 }
@@ -76,7 +79,6 @@ function init() {
  * @return void
  */
 function activate() {
-	put_mapping();
 	// First load the init scripts in case any rewrite functionality is being loaded
 	init();
 }
@@ -103,6 +105,10 @@ function no_ep_notice() {
 	printf( '<div class="%1$s"><p>%2$s</p></div>', $class, $message );
 }
 
+/**
+ * Insert mapping for stream into elasticSearch
+ * @return bool
+ */
 function put_mapping() {
 	$mapping = require( apply_filters( 'ep_stream_config_mapping_file', EPSTREAM_INC . '/mappings.php' ) );
 
@@ -110,14 +116,13 @@ function put_mapping() {
 	 * We are removing shard/replica defaults but need to maintain the filters
 	 * for backwards compat.
 	 *
-	 * @since 1.4
 	 */
 	global $wp_filter;
 	if ( ! empty( $wp_filter['ep_default_index_number_of_shards'] ) ) {
 		if ( empty( $mapping['settings']['index'] ) ) {
 			$mapping['settings']['index'] = array();
 		}
-
+		/** This filter is documented in ElasticPress plugin file classes/class-ep-api.php */
 		$mapping['settings']['index']['number_of_shards'] = (int) apply_filters( 'ep_default_index_number_of_shards', 5 ); // Default within Elasticsearch
 	}
 
@@ -125,7 +130,7 @@ function put_mapping() {
 		if ( empty( $mapping['settings']['index'] ) ) {
 			$mapping['settings']['index'] = array();
 		}
-
+		/** This filter is documented in ElasticPress plugin file classes/class-ep-api.php */
 		$mapping['settings']['index']['number_of_replicas'] = (int) apply_filters( 'ep_default_index_number_of_replicas', 1 );
 	}
 
@@ -138,14 +143,49 @@ function put_mapping() {
 		'method' => 'PUT',
 	);
 
-	$request = ep_remote_request( $index, apply_filters( 'ep_stream_put_mapping_request_args', $request_args ) );
-
-	$request = apply_filters( 'ep_stream_config_mapping_request', $request, $index, $mapping );
+	$request = ep_stream_remote_request( $index, $request_args );
 
 	if ( ! is_wp_error( $request ) && 200 === wp_remote_retrieve_response_code( $request ) ) {
 		$response_body = wp_remote_retrieve_body( $request );
+		//add into global alias
+		create_network_alias($index);
 
 		return json_decode( $response_body );
+	}
+
+	return false;
+}
+
+/**
+ * Add $index into network alias
+ * @param $index
+ *
+ * @return bool
+ */
+function create_network_alias( $index ) {
+
+	$path = '_aliases';
+
+	$args = array(
+		'actions' => array(),
+	);
+
+	$args['actions'][] = array(
+		'add' => array(
+			'index' => $index,
+			'alias' => ep_stream_get_network_alias(),
+		),
+	);
+
+	$request_args = array(
+		'body'   => json_encode( $args ),
+		'method' => 'POST',
+	);
+
+	$request = ep_stream_remote_request( $path, $request_args );
+
+	if ( ! is_wp_error( $request ) && ( 200 >= wp_remote_retrieve_response_code( $request ) && 300 > wp_remote_retrieve_response_code( $request ) ) ) {
+		return true;
 	}
 
 	return false;
