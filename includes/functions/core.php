@@ -4,9 +4,6 @@ namespace ElasticPress\Stream\Core;
 /**
  * Default setup routine
  *
- * @uses add_action()
- * @uses do_action()
- *
  * @return void
  */
 function setup() {
@@ -46,12 +43,6 @@ function driver( $default_driver ) {
 /**
  * Registers the default textdomain.
  *
- * @uses apply_filters()
- * @uses get_locale()
- * @uses load_textdomain()
- * @uses load_plugin_textdomain()
- * @uses plugin_basename()
- *
  * @return void
  */
 function i18n() {
@@ -63,7 +54,6 @@ function i18n() {
 /**
  * Initializes the plugin and fires an action other plugins can hook into.
  *
- * @uses do_action()
  *
  * @return void
  */
@@ -74,8 +64,6 @@ function init() {
 /**
  * Activate the plugin
  *
- * @uses init()
- * @uses flush_rewrite_rules()
  *
  * @return void
  */
