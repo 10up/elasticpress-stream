@@ -151,6 +151,16 @@ class DB_Driver_ElasticPress implements \WP_Stream\DB_Driver {
 	}
 
 	/**
+	 * Public getter to return table names
+	 *
+	 * @return array
+	 */
+	public function get_table_names() {
+		return array();
+	}
+
+
+	/**
 	 * Purge storage
 	 */
 	public function purge_storage() {

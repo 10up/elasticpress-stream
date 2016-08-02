@@ -11,6 +11,13 @@ return array(
 				'default'       => array(
 					'tokenizer' => 'standard',
 					'filter'    => array( 'standard', 'ewp_word_delimiter', 'lowercase', 'stop', 'ewp_snowball' ),
+					/**
+					 * Allow to change a set of analyzers aimed at analyzing specific language text.
+					 * Checkout https://www.elastic.co/guide/en/elasticsearch/reference/current/analysis-lang-analyzer.html
+					 * Default is english
+					 *
+					 * @return string
+					 */
 					'language'  => apply_filters( 'ep_analyzer_language', 'english', 'analyzer_default' ),
 				),
 				'ewp_lowercase' => array(
@@ -26,6 +33,13 @@ return array(
 				),
 				'ewp_snowball'       => array(
 					'type'     => 'snowball',
+					/**
+					 * Allow to change a set of analyzers aimed at analyzing specific language text.
+					 * Checkout https://www.elastic.co/guide/en/elasticsearch/reference/current/analysis-lang-analyzer.html
+					 * Default is english
+					 *
+					 * @return string
+					 */
 					'language' => apply_filters( 'ep_analyzer_language', 'english', 'filter_ewp_snowball' ),
 				),
 				'edge_ngram'         => array(

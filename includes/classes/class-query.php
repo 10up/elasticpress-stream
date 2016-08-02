@@ -103,6 +103,10 @@ class Query {
 								'query'     => $args['search'],
 								'type'      => 'phrase',
 								'fields'    => $search_fields,
+								/**
+								 * This allow to filter boost parameter, which help to prioritize query clauses
+								 * Read more : https://www.elastic.co/guide/en/elasticsearch/guide/current/multi-query-strings.html#prioritising-clauses
+								 */
 								'boost'     => apply_filters( 'ep_match_phrase_boost', 4, $search_fields, $args ),
 								'fuzziness' => 0,
 							)
@@ -111,6 +115,10 @@ class Query {
 							'multi_match' => array(
 								'query'     => $args['search'],
 								'fields'    => $search_fields,
+								/**
+								 * This allow to filter boost parameter, which help to prioritize query clauses
+								 * Read more : https://www.elastic.co/guide/en/elasticsearch/guide/current/multi-query-strings.html#prioritising-clauses
+								 */
 								'boost'     => apply_filters( 'ep_match_boost', 2, $search_fields, $args ),
 								'fuzziness' => 0,
 								'operator'  => 'and',
@@ -245,8 +253,9 @@ class Query {
 		/**
 		 * PARSE ORDER PARAMS
 		 */
-		$order     = esc_sql( $args['order'] );
-		$orderby   = 'asc' === $args['orderby'] ? 'asc' : 'desc';
+		$order = esc_sql( $args['order'] );
+		$order = 'asc' === $order ? 'asc' : 'desc';
+		$orderby = esc_sql( $args['orderby'] );
 		$orderable = array(
 			'ID',
 			'site_id',
@@ -268,7 +277,7 @@ class Query {
 		} elseif ( 'meta_value' === $orderby && ! empty( $args['meta_key'] ) ) {
 			$orderby = '';
 		} else {
-			$orderby = "created";
+			$orderby = 'created';
 		}
 		$formatted_args['sort'] = array(
 			$orderby => array( 'order' => $order )

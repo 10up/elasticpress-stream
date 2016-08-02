@@ -1,6 +1,6 @@
 <?php
 /**
- * This fill contains all the template/helper functions
+ * This file contains all the template & helper functions
  */
 
 /**
@@ -56,11 +56,11 @@ function ep_stream_remote_request( $path, $request_args ) {
 		return ep_remote_request( $path, $request_args );
 	}
 
-	return new WP_Error( 'ep_stream_remote_request_failed', esc_html__( 'ElasticPress function ep_remote_request is not present' ) );
+	return new WP_Error( 'ep_stream_remote_request_failed', esc_html__( 'ElasticPress function ep_remote_request is not present', 'EPStream' ) );
 }
 
 /**
- * Hlper function to encode json
+ * Helper function to encode json
  *
  * @param $record
  *

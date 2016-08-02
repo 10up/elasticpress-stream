@@ -20,6 +20,7 @@ function setup() {
 	add_action( 'ep_cli_put_mapping', $n( 'put_mapping' ) );
 	add_action( 'ep_put_mapping', $n( 'put_mapping' ) );
 	add_action( 'ep_create_network_alias', $n( 'create_network_alias' ) );
+	add_action( 'wp_stream_no_tables', '__return_true' );
 
 	do_action( 'EPStream_loaded' );
 }
@@ -119,7 +120,10 @@ function put_mapping() {
 	 */
 	global $wp_filter;
 	if ( ! empty( $wp_filter['ep_default_index_number_of_shards'] ) ) {
-		if ( empty( $mapping['settings']['index'] ) ) {
+		if ( false === isset( $mapping['settings'] ) ) {
+			$mapping['settings'] = array();
+		}
+		if ( false === isset( $mapping['settings']['index'] ) ) {
 			$mapping['settings']['index'] = array();
 		}
 		/** This filter is documented in ElasticPress plugin file classes/class-ep-api.php */
