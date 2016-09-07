@@ -41,36 +41,44 @@ define( 'EPSTREAM_URL', plugin_dir_url( __FILE__ ) );
 define( 'EPSTREAM_PATH', dirname( __FILE__ ) . '/' );
 define( 'EPSTREAM_INC', EPSTREAM_PATH . 'includes/' );
 
-
 // Include core file
 require_once EPSTREAM_INC . 'functions/template.php';
 require_once EPSTREAM_INC . 'functions/core.php';
 
-
-add_action( 'plugins_loaded', 'ep_stream_loader', 5 );
 /**
- * Only load plugin if ElasticPress is present
+ * Load the ElasticPress Stream Connector.
+ *
+ * Only load this if Steam is present, ElasticPress is
+ * present and the Elasticsearch index is set up.
+ *
+ * @since 0.1.0
+ *
+ * @return void
  */
 function ep_stream_loader() {
-	//If ElasticPress config class is not present
-	if ( false === class_exists( 'EP_Config' ) ) {
-		//Show admin notice
+	// If Stream isn't active
+	if ( ! class_exists( 'WP_Stream\Plugin' ) ) {
+		// Show admin notice
+		add_action( 'admin_notices', 'ElasticPress\Stream\Core\no_stream_notice' );
+
+		return;
+	}
+	// If ElasticPress isn't active
+	else if ( ! class_exists( 'EP_Config' ) ) {
+		// Show admin notice
 		add_action( 'admin_notices', 'ElasticPress\Stream\Core\no_ep_notice' );
 
 		return;
 	}
-	if ( true !== ep_stream_check_host() ) {
+	// If Elasticsearch isn't set up properly
+	else if ( ! ep_stream_check_host() ) {
+		// Show admin notice
+		add_action( 'admin_notices', 'ElasticPress\Stream\Core\no_es_notice' );
+
 		return;
 	}
 
-	// Include all required file
-
 	// Bootstrap
 	ElasticPress\Stream\Core\setup();
-
 }
-
-// Activation/Deactivation
-register_activation_hook( __FILE__, '\ElasticPress\Stream\Core\activate' );
-register_deactivation_hook( __FILE__, '\ElasticPress\Stream\Core\deactivate' );
-
+add_action( 'plugins_loaded', 'ep_stream_loader', 5 );

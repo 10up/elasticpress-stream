@@ -4,6 +4,8 @@ namespace ElasticPress\Stream\Core;
 /**
  * Default setup routine
  *
+ * @since 0.1.0
+ *
  * @return void
  */
 function setup() {
@@ -19,16 +21,24 @@ function setup() {
 	add_action( 'ep_create_network_alias', $n( 'create_network_alias' ) );
 	add_action( 'wp_stream_no_tables', '__return_true' );
 
+	/**
+	 * Fires after the plugin is loaded.
+	 *
+	 * @since 0.1.0
+	 */
 	do_action( 'EPStream_loaded' );
 }
 
 /**
- * @param $default_driver
+ * Load our custom driver, if we can.
  *
+ * @since 0.1.0
+ *
+ * @param string $default_driver Name of default driver class
  * @return string
  */
 function driver( $default_driver ) {
-
+	// If the Stream DB Driver interface exists, add our custom driver
 	if ( interface_exists( '\WP_Stream\DB_Driver' ) ) {
 		require_once EPSTREAM_INC . 'classes/class-query.php';
 		require_once EPSTREAM_INC . 'classes/class-db-driver-elasticpress.php';
@@ -37,11 +47,12 @@ function driver( $default_driver ) {
 	}
 
 	return $default_driver;
-
 }
 
 /**
  * Registers the default textdomain.
+ *
+ * @since 0.1.0
  *
  * @return void
  */
@@ -52,68 +63,95 @@ function i18n() {
 }
 
 /**
- * Initializes the plugin and fires an action other plugins can hook into.
+ * Initializes the plugin.
  *
+ * @since 0.1.0
  *
  * @return void
  */
 function init() {
+
+	/**
+	 * Fires when the plugin is initialized.
+	 *
+	 * @since 0.1.0
+	 */
 	do_action( 'EPStream_init' );
 }
 
 /**
- * Activate the plugin
+ * Show admin notice if the Stream plugin is not present.
  *
- *
- * @return void
- */
-function activate() {
-	// First load the init scripts in case any rewrite functionality is being loaded
-	init();
-}
-
-/**
- * Deactivate the plugin
- *
- * Uninstall routines should be in uninstall.php
+ * @since 0.1.0
  *
  * @return void
  */
-function deactivate() {
-
-}
-
-
-/**
- * Show admin notice if elasticPress plugin is not present
- */
-function no_ep_notice() {
+function no_stream_notice() {
 	$class   = 'notice notice-error';
-	$message = __( 'Please install and configure ElasticPress plugin to use ElasticPress Stream Connector', 'EPStream' );
+	$message = esc_html__( 'Please install and configure the Stream plugin to use the ElasticPress Stream Connector', 'EPStream' );
 
 	printf( '<div class="%1$s"><p>%2$s</p></div>', $class, $message );
 }
 
 /**
- * Insert mapping for stream into elasticSearch
+ * Show admin notice if the ElasticPress plugin is not present.
+ *
+ * @since 0.1.0
+ *
+ * @return void
+ */
+function no_ep_notice() {
+	$class   = 'notice notice-error';
+	$message = esc_html__( 'Please install and configure the ElasticPress plugin to use the ElasticPress Stream Connector', 'EPStream' );
+
+	printf( '<div class="%1$s"><p>%2$s</p></div>', $class, $message );
+}
+
+/**
+ * Show admin notice if Elasticsearch isn't setup properly.
+ *
+ * @since 0.1.0
+ *
+ * @return void
+ */
+function no_es_notice() {
+	$class   = 'notice notice-error';
+	$message = esc_html__( 'Please configure and run an index on Elasticsearch to use the ElasticPress Stream Connector', 'EPStream' );
+
+	printf( '<div class="%1$s"><p>%2$s</p></div>', $class, $message );
+}
+
+/**
+ * Insert mapping for Stream into Elasticsearch.
+ *
+ * @since 0.1.0
+ *
  * @return bool
  */
 function put_mapping() {
+	/**
+	 * Filter the EP Stream mapping file.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param string $file Location of mapping file.
+	 */
 	$mapping = require( apply_filters( 'ep_stream_config_mapping_file', EPSTREAM_INC . '/mappings.php' ) );
 
 	/**
-	 * We are removing shard/replica defaults but need to maintain the filters
+	 * Remove shard/replica defaults but maintain the filters
 	 * for backwards compat.
-	 *
 	 */
 	global $wp_filter;
 	if ( ! empty( $wp_filter['ep_default_index_number_of_shards'] ) ) {
 		if ( false === isset( $mapping['settings'] ) ) {
 			$mapping['settings'] = array();
 		}
+
 		if ( false === isset( $mapping['settings']['index'] ) ) {
 			$mapping['settings']['index'] = array();
 		}
+
 		/** This filter is documented in ElasticPress plugin file classes/class-ep-api.php */
 		$mapping['settings']['index']['number_of_shards'] = (int) apply_filters( 'ep_default_index_number_of_shards', 5 ); // Default within Elasticsearch
 	}
@@ -122,10 +160,18 @@ function put_mapping() {
 		if ( empty( $mapping['settings']['index'] ) ) {
 			$mapping['settings']['index'] = array();
 		}
+
 		/** This filter is documented in ElasticPress plugin file classes/class-ep-api.php */
 		$mapping['settings']['index']['number_of_replicas'] = (int) apply_filters( 'ep_default_index_number_of_replicas', 1 );
 	}
 
+	/**
+	 * Filter the EP Stream mapping config.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param array $mapping Mapping config.
+	 */
 	$mapping = apply_filters( 'ep_stream_config_mapping', $mapping );
 
 	$index = ep_stream_get_index_name();
@@ -139,8 +185,9 @@ function put_mapping() {
 
 	if ( ! is_wp_error( $request ) && 200 === wp_remote_retrieve_response_code( $request ) ) {
 		$response_body = wp_remote_retrieve_body( $request );
-		//add into global alias
-		create_network_alias($index);
+
+		// Add into global alias
+		create_network_alias( $index );
 
 		return json_decode( $response_body );
 	}
@@ -149,13 +196,14 @@ function put_mapping() {
 }
 
 /**
- * Add $index into network alias
- * @param $index
+ * Add the index into the network alias.
  *
+ * @since 0.1.0
+ *
+ * @param string $index Name of index.
  * @return bool
  */
 function create_network_alias( $index ) {
-
 	$path = '_aliases';
 
 	$args = array(
