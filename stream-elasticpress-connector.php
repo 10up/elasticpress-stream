@@ -71,7 +71,7 @@ function ep_stream_loader() {
 		return;
 	}
 	// If Elasticsearch isn't set up properly
-	else if ( ! ep_stream_check_host() ) {
+	else if ( is_wp_error( ep_stream_check_host() ) ) {
 		// Show admin notice
 		add_action( 'admin_notices', 'ElasticPress\Stream\Core\no_es_notice' );
 

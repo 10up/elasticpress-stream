@@ -116,7 +116,8 @@ function no_ep_notice() {
  */
 function no_es_notice() {
 	$class   = 'notice notice-error';
-	$message = esc_html__( 'Please configure and run an index on Elasticsearch to use the ElasticPress Stream Connector', 'EPStream' );
+	$active  = ep_stream_check_host();
+	$message = is_wp_error( $active ) ? $active->get_error_message() : esc_html__( 'Please configure and run an index on Elasticsearch to use the ElasticPress Stream Connector', 'EPStream' );
 
 	printf( '<div class="%1$s"><p>%2$s</p></div>', $class, $message );
 }
