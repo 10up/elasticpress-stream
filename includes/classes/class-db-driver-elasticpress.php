@@ -30,21 +30,28 @@ class DB_Driver_ElasticPress implements \WP_Stream\DB_Driver {
 	 *
 	 * @return int
 	 */
-	public function insert_record( $data ) {
-		//Return if importing
+	public function insert_record( $data = array() ) {
+		// Return if importing
 		if ( defined( 'WP_IMPORTING' ) && WP_IMPORTING ) {
 			return 0;
 		}
 
-		$meta         = $data['meta'];
-		$data['meta'] = array();
-		//convert date in proper format
-		$data['created'] = date( 'Y-m-d H:i:s', strtotime( $data['created'] ) );
-		// Insert record meta
-		foreach ( (array) $meta as $meta_key => $meta_values ) {
-			$data['meta'][ $meta_key ] = ep_stream_prepare_meta_value_types( $meta_values );
+		if ( isset( $data['meta'] ) && ! empty( $data['meta'] ) ) {
+			$meta         = $data['meta'];
+			$data['meta'] = array();
 
+			// Insert record meta
+			foreach ( (array) $meta as $meta_key => $meta_values ) {
+				$data['meta'][ $meta_key ] = ep_stream_prepare_meta_value_types( $meta_values );
+
+			}
 		}
+
+		if ( isset( $data['created'] ) && ! empty( $data['created'] ) ) {
+			// Convert date to proper format
+			$data['created'] = date( 'Y-m-d H:i:s', strtotime( $data['created'] ) );
+		}
+
 		$record_id = $this->index_record( $data );
 
 		return $record_id;
