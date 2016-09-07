@@ -13,21 +13,14 @@ class DB_Driver_ElasticPress implements \WP_Stream\DB_Driver {
 	 *
 	 * @var string
 	 */
-	public $table;
-
-	/**
-	 * Hold meta table name
-	 *
-	 * @var string
-	 */
-	public $table_meta;
+	public $index_name;
 
 	/**
 	 * Class constructor.
 	 */
 	public function __construct() {
-		$this->query = new Query( $this );
-		// @TODO: Implement method and make sure it is returning expected data same as DB_Driver_WPDB
+		$this->query      = new Query( $this );
+		$this->index_name = trailingslashit( \ep_stream_get_index_name() );
 	}
 
 	/**
@@ -37,23 +30,76 @@ class DB_Driver_ElasticPress implements \WP_Stream\DB_Driver {
 	 *
 	 * @return int
 	 */
-	public function insert_record( $data ) {
-		// @TODO: Implement method and make sure it is returning expected data same as DB_Driver_WPDB
+	public function insert_record( $data = array() ) {
+		// Return if importing
+		if ( defined( 'WP_IMPORTING' ) && WP_IMPORTING ) {
+			return 0;
+		}
+
+		if ( isset( $data['meta'] ) && ! empty( $data['meta'] ) ) {
+			$meta         = $data['meta'];
+			$data['meta'] = array();
+
+			// Insert record meta
+			foreach ( (array) $meta as $meta_key => $meta_values ) {
+				$data['meta'][ $meta_key ] = ep_stream_prepare_meta_value_types( $meta_values );
+
+			}
+		}
+
+		if ( isset( $data['created'] ) && ! empty( $data['created'] ) ) {
+			// Convert date to proper format
+			$data['created'] = date( 'Y-m-d H:i:s', strtotime( $data['created'] ) );
+		}
+
+		$record_id = $this->index_record( $data );
+
 		return $record_id;
 	}
 
 	/**
-	 * Insert record meta
+	 * Index record in elasticSearch
 	 *
-	 * @param int $record_id
-	 * @param string $key
-	 * @param string $val
+	 * @param $record
+	 * @param bool $blocking
 	 *
-	 * @return array
+	 * @return bool
 	 */
-	public function insert_meta( $record_id, $key, $val ) {
-		// @TODO: Implement method and make sure it is returning expected data same as DB_Driver_WPDB
-		return $result;
+	function index_record( $record, $blocking = true ) {
+
+		/**
+		 * Filter record prior to indexing
+		 *
+		 * Allows for last minute indexing of stream record information.
+		 *
+		 *
+		 * @param         array Array of stream record information to index.
+		 */
+		$record = apply_filters( 'ep_stream_pre_index_record', $record );
+
+
+		$path = $this->index_name . 'record';
+
+		$request_args = array(
+			'body'     => ep_stream_json_encode( $record ),
+			'method'   => 'POST',
+			'timeout'  => 15,
+			'blocking' => $blocking,
+		);
+
+		$request = ep_stream_remote_request( $path, $request_args );
+
+		if ( ! is_wp_error( $request ) ) {
+			$response_body = wp_remote_retrieve_body( $request );
+
+			$response = json_decode( $response_body );
+
+			if ( $response->_id ) {
+				return $response->_id;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -64,7 +110,6 @@ class DB_Driver_ElasticPress implements \WP_Stream\DB_Driver {
 	 * @return array
 	 */
 	public function get_records( $args ) {
-		// @TODO: Implement method and make sure it is returning expected data same as DB_Driver_WPDB
 		return $this->query->query( $args );
 	}
 
@@ -80,8 +125,47 @@ class DB_Driver_ElasticPress implements \WP_Stream\DB_Driver {
 	 * @return array
 	 */
 	public function get_column_values( $column ) {
-		// @TODO: Implement method and make sure it is returning expected data same as DB_Driver_WPDB
+
+		$formatted_args = array(
+			'size' => 0,
+			'aggs' => array( 'group_by_column' => array( 'terms' => array( 'field' => $column, 'size' => 1000 ) ) )
+		);
+
+		$path = ep_stream_get_index_name() . '/record/_search';
+
+		$request_args = array(
+			'body'   => ep_stream_json_encode( $formatted_args ),
+			'method' => 'POST',
+		);
+
+		$request = ep_stream_remote_request( $path, $request_args );
+		$result  = array();
+		if ( ! is_wp_error( $request ) ) {
+
+			$response_body = wp_remote_retrieve_body( $request );
+
+			$response = json_decode( $response_body, true );
+			if ( isset( $response['aggregations'] ) && isset( $response['aggregations']['group_by_column'] ) ) {
+				$buckets = $response['aggregations']['group_by_column']['buckets'];
+				foreach ( $buckets as $row ) {
+					$result[] = array( $column => $row['key'] );
+				}
+			}
+		}
+
+		return $result;
+
 	}
+
+	/**
+	 * Public getter to return table names
+	 *
+	 * @return array
+	 */
+	public function get_table_names() {
+		return array();
+	}
+
 
 	/**
 	 * Purge storage

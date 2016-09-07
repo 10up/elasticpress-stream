@@ -43,6 +43,7 @@ define( 'EPSTREAM_INC', EPSTREAM_PATH . 'includes/' );
 
 
 // Include core file
+require_once EPSTREAM_INC . 'functions/template.php';
 require_once EPSTREAM_INC . 'functions/core.php';
 
 
@@ -58,7 +59,7 @@ function ep_stream_loader() {
 
 		return;
 	}
-	if ( true !== ep_check_host() ) {
+	if ( true !== ep_stream_check_host() ) {
 		return;
 	}
 
