@@ -4,7 +4,11 @@
  */
 
 /**
- * Return stream index name for current site
+ * Return stream index name for current site.
+ *
+ * @since 0.1.0
+ *
+ * @param int|null $blog_id ID of blog to get name for.
  * @return string
  */
 function ep_stream_get_index_name( $blog_id = null ) {
@@ -16,8 +20,10 @@ function ep_stream_get_index_name( $blog_id = null ) {
 }
 
 /**
- * A wrapper function of elasticPress ep_check_host
- * return false if elasticPress is not present
+ * A wrapper function of ElasticPress ep_check_host.
+ *
+ * @since 0.1.0
+ *
  * @return bool
  */
 function ep_stream_check_host() {
@@ -29,10 +35,11 @@ function ep_stream_check_host() {
 }
 
 /**
- * Wrapper function of EP_API->prepare_meta_value_types
+ * Wrapper function of EP_API->prepare_meta_value_types.
  *
- * @param $meta_values
+ * @since 0.1.0
  *
+ * @param mixed $meta_values Values to prepare
  * @return mixed
  */
 function ep_stream_prepare_meta_value_types( $meta_values ) {
@@ -44,11 +51,12 @@ function ep_stream_prepare_meta_value_types( $meta_values ) {
 }
 
 /**
- * Wrapper for ep_remote_request which is defined in ElasticPress
+ * Wrapper for ep_remote_request which is defined in ElasticPress.
+ *
+ * @since 0.1.0
  *
  * @param string $path Site URL to retrieve.
- * @param array $args Optional. Request arguments. Default empty array.
- *
+ * @param array $request_args Optional. Request arguments. Default empty array.
  * @return WP_Error|array The response or WP_Error on failure.
  */
 function ep_stream_remote_request( $path, $request_args ) {
@@ -62,8 +70,9 @@ function ep_stream_remote_request( $path, $request_args ) {
 /**
  * Helper function to encode json
  *
- * @param $record
+ * @since 0.1.0
  *
+ * @param string $record Record to encode.
  * @return false|mixed|string|void
  */
 function ep_stream_json_encode( $record ) {
@@ -79,21 +88,25 @@ function ep_stream_json_encode( $record ) {
 /**
  * Wrapper function of wp_stream_filter_var
  *
- * @param $var  Variable to filter
- * @param $filter Filter Name
+ * @since 0.1.0
  *
- * @return mixed filtered value
+ * @param string $var Variable to filter.
+ * @param int $filter The ID of the filter to apply.
+ * @return mixed
  */
 function ep_stream_filter_var( $var, $filter ) {
 	if ( function_exists( 'wp_stream_filter_var' ) ) {
 		wp_stream_filter_var( $var, $filter );
 	}
 
-	return filter_var( $var, $filter );;
+	return filter_var( $var, $filter );
 }
 
 /**
- * Return network alias
+ * Get the network alias.
+ *
+ * @since 0.1.0
+ *
  * @return mixed|void
  */
 function ep_stream_get_network_alias() {
@@ -103,12 +116,21 @@ function ep_stream_get_network_alias() {
 
 	$alias = 'stream-' . $slug . '-global';
 
+	/**
+	 * Filter the EP Stream alias.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param string $alias Alias name.
+	 */
 	return apply_filters( 'ep_stream_global_alias', $alias );
 }
 
 /**
- * Wrapper function of ep_get_sites
- * return empty array if elasticPress is not present
+ * Wrapper function of ep_get_sites.
+ *
+ * @since 0.1.0
+ *
  * @return array
  */
 function ep_stream_get_sites() {
