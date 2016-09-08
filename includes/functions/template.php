@@ -4,6 +4,87 @@
  */
 
 /**
+ * Load the ElasticPress Stream Connector.
+ *
+ * This is only ran when the ElasticPress Stream module
+ * has been activated. We then only load the functionality
+ * if the Elasticsearch index is set up.
+ *
+ * @since 0.1.0
+ *
+ * @return void
+ */
+function ep_stream_loader() {
+	// If Elasticsearch isn't set up properly
+	if ( is_wp_error( ep_stream_check_host() ) ) {
+		// Show admin notice
+		add_action( 'admin_notices', 'ElasticPress\Stream\Core\no_es_notice' );
+
+		return;
+	}
+
+	// Bootstrap
+	ElasticPress\Stream\Core\setup();
+}
+
+/**
+ * Output the module box summary.
+ *
+ * @since 0.1.0
+ *
+ * @return void
+ */
+function ep_stream_module_box_summary() {
+?>
+
+	<p>
+		<?php esc_html_e( 'Increase the performance of Stream, as this module stores and retrieves data from within Elasticsearch, not the database.', 'EPStream' ); ?>
+	</p>
+
+<?php
+}
+
+/**
+ * Output the module box long description.
+ *
+ * @since 0.1.0
+ *
+ * @return void
+ */
+function ep_stream_module_box_long() {
+?>
+
+	<p>
+		<?php _e( 'With Stream, you\'re never left in the dark about WordPress Admin activity. Every logged-in user action is displayed in an activity stream and organised for easy filtering by User, Role, Context, Action or IP address.', 'EPStream' ); ?>
+	</p>
+
+	<p>
+		<?php _e( 'This is perfect for keeping tabs on what gets changed on your site. When something breaks, Stream is there to help. See what changed and who changed it. The problem is, all this information is stored in the database, making a lot of extra read/write calls.', 'EPStream' ); ?>
+	</p>
+
+	<p>
+		<?php _e( 'Using the ElasticPress Stream module in conjunction with Stream will speed things up tremendously. All data is stored and retrieved in Elasticsearch, using the ElasticPress API.', 'EPStream' ); ?>
+	</p>
+
+<?php
+}
+
+/**
+ * Make sure Stream is active before we activate the module.
+ *
+ * @since 0.1.0
+ *
+ * @return bool|WP_Error
+ */
+function ep_stream_dependencies_met_cb() {
+	if ( ! class_exists( 'WP_Stream\Plugin' ) ) {
+		return new WP_Error( 'ep-no-stream', esc_html__( 'Please install and configure the Stream plugin to use this module.', 'EPStream' ) );
+	}
+
+	return true;
+}
+
+/**
  * Return stream index name for current site.
  *
  * @since 0.1.0

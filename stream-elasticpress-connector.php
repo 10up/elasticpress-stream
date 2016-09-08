@@ -46,39 +46,40 @@ require_once EPSTREAM_INC . 'functions/template.php';
 require_once EPSTREAM_INC . 'functions/core.php';
 
 /**
- * Load the ElasticPress Stream Connector.
+ * Register the ElasticPress Stream module.
  *
- * Only load this if Steam is present, ElasticPress is
- * present and the Elasticsearch index is set up.
+ * Only register this if the ElasticPress plugin
+ * is active and the ep_register_module function
+ * is present, meaning ElasticPress is the proper
+ * version (>= 2.1).
  *
  * @since 0.1.0
  *
  * @return void
  */
-function ep_stream_loader() {
-	// If Stream isn't active
-	if ( ! class_exists( 'WP_Stream\Plugin' ) ) {
-		// Show admin notice
-		add_action( 'admin_notices', 'ElasticPress\Stream\Core\no_stream_notice' );
+function ep_stream_register_module() {
+	if ( class_exists( 'EP_Config' ) && function_exists( 'ep_register_module' ) ) {
+		if ( defined( 'EP_IS_NETWORK' ) && EP_IS_NETWORK ) {
+			$modules = get_site_option( 'ep_active_modules', array() );
+		} else {
+			$modules = get_option( 'ep_active_modules', array() );
+		}
 
-		return;
-	}
-	// If ElasticPress isn't active
-	else if ( ! class_exists( 'EP_Config' ) ) {
+		ep_register_module( 'stream', array(
+			'title'                    => 'ElasticPress Stream Connector',
+			'requires_install_reindex' => true,
+			//'setup_cb'                 => 'ep_stream_loader',
+			'module_box_summary_cb'    => 'ep_stream_module_box_summary',
+			'module_box_long_cb'       => 'ep_stream_module_box_long',
+			'dependencies_met_cb'      => 'ep_stream_dependencies_met_cb',
+		) );
+
+		if ( ! empty( $modules ) && false !== array_search( 'stream', $modules ) ) {
+			ep_stream_loader();
+		}
+	} else {
 		// Show admin notice
 		add_action( 'admin_notices', 'ElasticPress\Stream\Core\no_ep_notice' );
-
-		return;
 	}
-	// If Elasticsearch isn't set up properly
-	else if ( is_wp_error( ep_stream_check_host() ) ) {
-		// Show admin notice
-		add_action( 'admin_notices', 'ElasticPress\Stream\Core\no_es_notice' );
-
-		return;
-	}
-
-	// Bootstrap
-	ElasticPress\Stream\Core\setup();
 }
-add_action( 'plugins_loaded', 'ep_stream_loader', 5 );
+add_action( 'plugins_loaded', 'ep_stream_register_module', 5 );
