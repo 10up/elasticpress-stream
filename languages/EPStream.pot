@@ -1,16 +1,86 @@
+# Copyright (C) 2016 10up, Faishal
+# This file is distributed under the GPL-2.0+.
 msgid ""
 msgstr ""
-"Project-Id-Version: Stream ElasticPress Connector\n"
+"Project-Id-Version: Stream ElasticPress Connector 0.1.0\n"
+"Report-Msgid-Bugs-To: "
+"https://wordpress.org/support/plugin/stream-elasticpress-connector\n"
 "POT-Creation-Date: 2016-06-10T17:02:11.618Z\n"
-"PO-Revision-Date: 2016-06-10T17:02:11.618Z\n"
-"Last-Translator: Faishal Saiyed <faishal@10up.com>\n"
-"Language-Team: \n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Poedit-KeywordsList: __;_e;__ngettext:1,2;_n:1,2;__ngettext_noop:1,2;"
-"_n_noop:1,2;_x:1,2c;_nx:4c,1,2;_nx_noop:4c,1,2;_ex:1,2c;"
-"esc_attr__;esc_attr_e;esc_attr_x:1,2c;esc_html__;esc_html_e;esc_html_x:1,2c\n"
-"X-Poedit-Basepath: .\n"
-"X-Poedit-SearchPath-0: ..\n"
+"PO-Revision-Date: 2016-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"X-Generator: grunt-wp-i18n 0.5.4\n"
+"X-Poedit-KeywordsList: "
+"__;_e;_x:1,2c;_ex:1,2c;_n:1,2;_nx:1,2,4c;_n_noop:1,2;_nx_noop:1,2,3c;esc_"
+"attr__;esc_html__;esc_attr_e;esc_html_e;esc_attr_x:1,2c;esc_html_x:1,2c;\n"
+"Language: en\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Poedit-Country: United States\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-Basepath: ../\n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-Bookmarks: \n"
+"X-Textdomain-Support: yes\n"
 
+#: includes/functions/core.php:91
+msgid ""
+"Please install and configure the ElasticPress plugin (v2.1 or greater) to "
+"use the ElasticPress Stream Connector"
+msgstr ""
+
+#: includes/functions/core.php:106
+msgid ""
+"Please configure and run an index on Elasticsearch to use the ElasticPress "
+"Stream Connector"
+msgstr ""
+
+#: includes/functions/template.php:41
+msgid ""
+"Increase the performance of Stream, as this module stores and retrieves "
+"data from within Elasticsearch, not the database."
+msgstr ""
+
+#: includes/functions/template.php:58
+msgid ""
+"With Stream, you're never left in the dark about WordPress Admin activity. "
+"Every logged-in user action is displayed in an activity stream and "
+"organised for easy filtering by User, Role, Context, Action or IP address."
+msgstr ""
+
+#: includes/functions/template.php:62
+msgid ""
+"This is perfect for keeping tabs on what gets changed on your site. When "
+"something breaks, Stream is there to help. See what changed and who changed "
+"it. The problem is, all this information is stored in the database, making "
+"a lot of extra read/write calls."
+msgstr ""
+
+#: includes/functions/template.php:66
+msgid ""
+"Using the ElasticPress Stream module in conjunction with Stream will speed "
+"things up tremendously. All data is stored and retrieved in Elasticsearch, "
+"using the ElasticPress API."
+msgstr ""
+
+#: includes/functions/template.php:81
+msgid "Please install and configure the Stream plugin to use this module."
+msgstr ""
+
+#: includes/functions/template.php:148
+msgid "ElasticPress function ep_remote_request is not present"
+msgstr ""
+
+#. Description of the plugin/theme
+msgid "Stream ElasticPress Connector"
+msgstr ""
+
+#. Author URI of the plugin/theme
+msgid "http://10up.com"
+msgstr ""
+
+#. Author of the plugin/theme
+msgid "10up, Faishal"
+msgstr ""

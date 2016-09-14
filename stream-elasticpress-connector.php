@@ -41,36 +41,35 @@ define( 'EPSTREAM_URL', plugin_dir_url( __FILE__ ) );
 define( 'EPSTREAM_PATH', dirname( __FILE__ ) . '/' );
 define( 'EPSTREAM_INC', EPSTREAM_PATH . 'includes/' );
 
-
 // Include core file
 require_once EPSTREAM_INC . 'functions/template.php';
 require_once EPSTREAM_INC . 'functions/core.php';
 
-
-add_action( 'plugins_loaded', 'ep_stream_loader', 5 );
 /**
- * Only load plugin if ElasticPress is present
+ * Register the ElasticPress Stream module.
+ *
+ * Only register this if the ElasticPress plugin
+ * is active and the ep_register_module function
+ * is present, meaning ElasticPress is the proper
+ * version (>= 2.1).
+ *
+ * @since 0.1.0
+ *
+ * @return void
  */
-function ep_stream_loader() {
-	//If ElasticPress config class is not present
-	if ( false === class_exists( 'EP_Config' ) ) {
-		//Show admin notice
+function ep_stream_register_module() {
+	if ( class_exists( 'EP_Config' ) && function_exists( 'ep_register_module' ) ) {
+		ep_register_module( 'stream', array(
+			'title'                    => 'ElasticPress Stream Connector',
+			'requires_install_reindex' => true,
+			'setup_cb'                 => 'ep_stream_loader',
+			'module_box_summary_cb'    => 'ep_stream_module_box_summary',
+			'module_box_long_cb'       => 'ep_stream_module_box_long',
+			'dependencies_met_cb'      => 'ep_stream_dependencies_met_cb',
+		) );
+	} else {
+		// Show admin notice
 		add_action( 'admin_notices', 'ElasticPress\Stream\Core\no_ep_notice' );
-
-		return;
 	}
-	if ( true !== ep_stream_check_host() ) {
-		return;
-	}
-
-	// Include all required file
-
-	// Bootstrap
-	ElasticPress\Stream\Core\setup();
-
 }
-
-// Activation/Deactivation
-register_activation_hook( __FILE__, '\ElasticPress\Stream\Core\activate' );
-register_deactivation_hook( __FILE__, '\ElasticPress\Stream\Core\deactivate' );
-
+add_action( 'plugins_loaded', 'ep_stream_register_module', 5 );

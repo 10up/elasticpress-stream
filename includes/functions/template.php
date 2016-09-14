@@ -4,7 +4,92 @@
  */
 
 /**
- * Return stream index name for current site
+ * Load the ElasticPress Stream Connector.
+ *
+ * This is only ran when the ElasticPress Stream module
+ * has been activated. We then only load the functionality
+ * if the Elasticsearch index is set up.
+ *
+ * @since 0.1.0
+ *
+ * @return void
+ */
+function ep_stream_loader() {
+	// If Elasticsearch isn't set up properly
+	if ( is_wp_error( ep_stream_check_host() ) ) {
+		// Show admin notice
+		add_action( 'admin_notices', 'ElasticPress\Stream\Core\no_es_notice' );
+
+		return;
+	}
+
+	// Bootstrap
+	ElasticPress\Stream\Core\setup();
+}
+
+/**
+ * Output the module box summary.
+ *
+ * @since 0.1.0
+ *
+ * @return void
+ */
+function ep_stream_module_box_summary() {
+?>
+
+	<p>
+		<?php esc_html_e( 'Increase the performance of Stream, as this module stores and retrieves data from within Elasticsearch, not the database.', 'EPStream' ); ?>
+	</p>
+
+<?php
+}
+
+/**
+ * Output the module box long description.
+ *
+ * @since 0.1.0
+ *
+ * @return void
+ */
+function ep_stream_module_box_long() {
+?>
+
+	<p>
+		<?php esc_html_e( 'With Stream, you\'re never left in the dark about WordPress Admin activity. Every logged-in user action is displayed in an activity stream and organised for easy filtering by User, Role, Context, Action or IP address.', 'EPStream' ); ?>
+	</p>
+
+	<p>
+		<?php esc_html_e( 'This is perfect for keeping tabs on what gets changed on your site. When something breaks, Stream is there to help. See what changed and who changed it. The problem is, all this information is stored in the database, making a lot of extra read/write calls.', 'EPStream' ); ?>
+	</p>
+
+	<p>
+		<?php esc_html_e( 'Using the ElasticPress Stream module in conjunction with Stream will speed things up tremendously. All data is stored and retrieved in Elasticsearch, using the ElasticPress API.', 'EPStream' ); ?>
+	</p>
+
+<?php
+}
+
+/**
+ * Make sure Stream is active before we activate the module.
+ *
+ * @since 0.1.0
+ *
+ * @return bool|WP_Error
+ */
+function ep_stream_dependencies_met_cb() {
+	if ( ! class_exists( 'WP_Stream\Plugin' ) ) {
+		return new WP_Error( 'ep-no-stream', esc_html__( 'Please install and configure the Stream plugin to use this module.', 'EPStream' ) );
+	}
+
+	return true;
+}
+
+/**
+ * Return stream index name for current site.
+ *
+ * @since 0.1.0
+ *
+ * @param int|null $blog_id ID of blog to get name for.
  * @return string
  */
 function ep_stream_get_index_name( $blog_id = null ) {
@@ -16,8 +101,10 @@ function ep_stream_get_index_name( $blog_id = null ) {
 }
 
 /**
- * A wrapper function of elasticPress ep_check_host
- * return false if elasticPress is not present
+ * A wrapper function of ElasticPress ep_check_host.
+ *
+ * @since 0.1.0
+ *
  * @return bool
  */
 function ep_stream_check_host() {
@@ -29,10 +116,11 @@ function ep_stream_check_host() {
 }
 
 /**
- * Wrapper function of EP_API->prepare_meta_value_types
+ * Wrapper function of EP_API->prepare_meta_value_types.
  *
- * @param $meta_values
+ * @since 0.1.0
  *
+ * @param mixed $meta_values Values to prepare
  * @return mixed
  */
 function ep_stream_prepare_meta_value_types( $meta_values ) {
@@ -44,11 +132,12 @@ function ep_stream_prepare_meta_value_types( $meta_values ) {
 }
 
 /**
- * Wrapper for ep_remote_request which is defined in ElasticPress
+ * Wrapper for ep_remote_request which is defined in ElasticPress.
+ *
+ * @since 0.1.0
  *
  * @param string $path Site URL to retrieve.
- * @param array $args Optional. Request arguments. Default empty array.
- *
+ * @param array $request_args Optional. Request arguments. Default empty array.
  * @return WP_Error|array The response or WP_Error on failure.
  */
 function ep_stream_remote_request( $path, $request_args ) {
@@ -62,8 +151,9 @@ function ep_stream_remote_request( $path, $request_args ) {
 /**
  * Helper function to encode json
  *
- * @param $record
+ * @since 0.1.0
  *
+ * @param string $record Record to encode.
  * @return false|mixed|string|void
  */
 function ep_stream_json_encode( $record ) {
@@ -79,21 +169,25 @@ function ep_stream_json_encode( $record ) {
 /**
  * Wrapper function of wp_stream_filter_var
  *
- * @param $var  Variable to filter
- * @param $filter Filter Name
+ * @since 0.1.0
  *
- * @return mixed filtered value
+ * @param string $var Variable to filter.
+ * @param int $filter The ID of the filter to apply.
+ * @return mixed
  */
 function ep_stream_filter_var( $var, $filter ) {
 	if ( function_exists( 'wp_stream_filter_var' ) ) {
 		wp_stream_filter_var( $var, $filter );
 	}
 
-	return filter_var( $var, $filter );;
+	return filter_var( $var, $filter );
 }
 
 /**
- * Return network alias
+ * Get the network alias.
+ *
+ * @since 0.1.0
+ *
  * @return mixed|void
  */
 function ep_stream_get_network_alias() {
@@ -103,12 +197,21 @@ function ep_stream_get_network_alias() {
 
 	$alias = 'stream-' . $slug . '-global';
 
+	/**
+	 * Filter the EP Stream alias.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param string $alias Alias name.
+	 */
 	return apply_filters( 'ep_stream_global_alias', $alias );
 }
 
 /**
- * Wrapper function of ep_get_sites
- * return empty array if elasticPress is not present
+ * Wrapper function of ep_get_sites.
+ *
+ * @since 0.1.0
+ *
  * @return array
  */
 function ep_stream_get_sites() {

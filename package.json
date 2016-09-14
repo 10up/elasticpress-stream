@@ -1,0 +1,16 @@
+{
+  "name": "epstream",
+  "title": "Stream ElasticPress Connector",
+  "description": "Store Stream data in Elasticsearch, using ElasticPress",
+  "version": "0.1.0",
+  "homepage": "http://10up.com/",
+  "author": {
+    "name": "10up Inc",
+    "url": "http://10up.com/"
+  },
+  "devDependencies": {
+    "grunt": "~0.4.5",
+    "grunt-wp-i18n": "^0.5.4",
+    "matchdep": "^0.3.0"
+  }
+}

@@ -1,15 +1,16 @@
 <?php
-
 namespace ElasticPress\Stream\Driver;
+
 class DB_Driver_ElasticPress implements \WP_Stream\DB_Driver {
 	/**
-	 * Hold Query class
-	 * @var Query
+	 * Hold the Query class.
+	 *
+	 * @var \ElasticPress\Stream\Driver\Query
 	 */
 	protected $query;
 
 	/**
-	 * Hold records table name
+	 * Hold the records table name.
 	 *
 	 * @var string
 	 */
@@ -17,6 +18,8 @@ class DB_Driver_ElasticPress implements \WP_Stream\DB_Driver {
 
 	/**
 	 * Class constructor.
+	 *
+	 * @since 0.1.0
 	 */
 	public function __construct() {
 		$this->query      = new Query( $this );
@@ -26,50 +29,58 @@ class DB_Driver_ElasticPress implements \WP_Stream\DB_Driver {
 	/**
 	 * Insert a record
 	 *
-	 * @param array $data
+	 * @since 0.1.0
 	 *
+	 * @param array $data Data to insert.
 	 * @return int
 	 */
-	public function insert_record( $data ) {
-		//Return if importing
+	public function insert_record( $data = array() ) {
+		// Return if importing
 		if ( defined( 'WP_IMPORTING' ) && WP_IMPORTING ) {
 			return 0;
 		}
 
-		$meta         = $data['meta'];
-		$data['meta'] = array();
-		//convert date in proper format
-		$data['created'] = date( 'Y-m-d H:i:s', strtotime( $data['created'] ) );
-		// Insert record meta
-		foreach ( (array) $meta as $meta_key => $meta_values ) {
-			$data['meta'][ $meta_key ] = ep_stream_prepare_meta_value_types( $meta_values );
+		if ( isset( $data['meta'] ) && ! empty( $data['meta'] ) ) {
+			$meta         = $data['meta'];
+			$data['meta'] = array();
 
+			// Insert record meta
+			foreach ( (array) $meta as $meta_key => $meta_values ) {
+				$data['meta'][ $meta_key ] = ep_stream_prepare_meta_value_types( $meta_values );
+			}
 		}
+
+		if ( isset( $data['created'] ) && ! empty( $data['created'] ) ) {
+			// Convert date to proper format
+			$data['created'] = date( 'Y-m-d H:i:s', strtotime( $data['created'] ) );
+		}
+
 		$record_id = $this->index_record( $data );
 
 		return $record_id;
 	}
 
 	/**
-	 * Index record in elasticSearch
+	 * Index record in Elasticsearch.
 	 *
-	 * @param $record
-	 * @param bool $blocking
+	 * @since 0.1.0
 	 *
+	 * @param array $record Array of stream record information to index
+	 * @param bool $blocking Whether this is a blocking request or not. Default true.
 	 * @return bool
 	 */
-	function index_record( $record, $blocking = true ) {
+	public function index_record( $record, $blocking = true ) {
 
 		/**
-		 * Filter record prior to indexing
+		 * Filter record prior to indexing.
 		 *
 		 * Allows for last minute indexing of stream record information.
 		 *
+		 * @since 0.1.0
 		 *
-		 * @param         array Array of stream record information to index.
+		 * @param array $record Array of stream record information to index.
 		 */
 		$record = apply_filters( 'ep_stream_pre_index_record', $record );
-
 
 		$path = $this->index_name . 'record';
 
@@ -84,8 +95,7 @@ class DB_Driver_ElasticPress implements \WP_Stream\DB_Driver {
 
 		if ( ! is_wp_error( $request ) ) {
 			$response_body = wp_remote_retrieve_body( $request );
-
-			$response = json_decode( $response_body );
+			$response      = json_decode( $response_body );
 
 			if ( $response->_id ) {
 				return $response->_id;
@@ -96,10 +106,11 @@ class DB_Driver_ElasticPress implements \WP_Stream\DB_Driver {
 	}
 
 	/**
-	 * Retrieve records
+	 * Retrieve records.
 	 *
-	 * @param array $args
+	 * @since 0.1.0
 	 *
+	 * @param array $args Arguments to query for.
 	 * @return array
 	 */
 	public function get_records( $args ) {
@@ -107,21 +118,29 @@ class DB_Driver_ElasticPress implements \WP_Stream\DB_Driver {
 	}
 
 	/**
-	 * Returns array of existing values for requested column.
+	 * Get existing values for requested column.
+	 *
 	 * Used to fill search filters with only used items, instead of all items.
 	 *
-	 * GROUP BY allows query to find just the first occurance of each value in the column,
+	 * GROUP BY allows query to find just the first occurrence of each value in the column,
 	 * increasing the efficiency of the query.
 	 *
-	 * @param string $column
+	 * @since 0.1.0
 	 *
+	 * @param string $column Column name.
 	 * @return array
 	 */
 	public function get_column_values( $column ) {
-
 		$formatted_args = array(
 			'size' => 0,
-			'aggs' => array( 'group_by_column' => array( 'terms' => array( 'field' => $column, 'size' => 1000 ) ) )
+			'aggs' => array(
+				'group_by_column' => array(
+					'terms' => array(
+						'field' => $column,
+						'size'  => 1000,
+					),
+				),
+			),
 		);
 
 		$path = ep_stream_get_index_name() . '/record/_search';
@@ -133,11 +152,12 @@ class DB_Driver_ElasticPress implements \WP_Stream\DB_Driver {
 
 		$request = ep_stream_remote_request( $path, $request_args );
 		$result  = array();
-		if ( ! is_wp_error( $request ) ) {
 
+		if ( ! is_wp_error( $request ) ) {
 			$response_body = wp_remote_retrieve_body( $request );
 
 			$response = json_decode( $response_body, true );
+
 			if ( isset( $response['aggregations'] ) && isset( $response['aggregations']['group_by_column'] ) ) {
 				$buckets = $response['aggregations']['group_by_column']['buckets'];
 				foreach ( $buckets as $row ) {
@@ -147,11 +167,12 @@ class DB_Driver_ElasticPress implements \WP_Stream\DB_Driver {
 		}
 
 		return $result;
-
 	}
 
 	/**
 	 * Public getter to return table names
+	 *
+	 * @since 0.1.0
 	 *
 	 * @return array
 	 */
@@ -161,16 +182,25 @@ class DB_Driver_ElasticPress implements \WP_Stream\DB_Driver {
 
 
 	/**
-	 * Purge storage
+	 * Purge storage.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return void
 	 */
 	public function purge_storage() {
 		// @TODO: Implement method and rework class-uninstall to use this method
 	}
 
 	/**
-	 * Init storage
+	 * Init storage.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @return void
 	 */
 	public function setup_storage() {
 		// @TODO: Implement method and rework class-install to use this method
 	}
+
 }
