@@ -59,24 +59,14 @@ require_once EPSTREAM_INC . 'functions/core.php';
  */
 function ep_stream_register_module() {
 	if ( class_exists( 'EP_Config' ) && function_exists( 'ep_register_module' ) ) {
-		if ( defined( 'EP_IS_NETWORK' ) && EP_IS_NETWORK ) {
-			$modules = get_site_option( 'ep_active_modules', array() );
-		} else {
-			$modules = get_option( 'ep_active_modules', array() );
-		}
-
 		ep_register_module( 'stream', array(
 			'title'                    => 'ElasticPress Stream Connector',
 			'requires_install_reindex' => true,
-			//'setup_cb'                 => 'ep_stream_loader',
+			'setup_cb'                 => 'ep_stream_loader',
 			'module_box_summary_cb'    => 'ep_stream_module_box_summary',
 			'module_box_long_cb'       => 'ep_stream_module_box_long',
 			'dependencies_met_cb'      => 'ep_stream_dependencies_met_cb',
 		) );
-
-		if ( ! empty( $modules ) && false !== array_search( 'stream', $modules ) ) {
-			ep_stream_loader();
-		}
 	} else {
 		// Show admin notice
 		add_action( 'admin_notices', 'ElasticPress\Stream\Core\no_ep_notice' );
