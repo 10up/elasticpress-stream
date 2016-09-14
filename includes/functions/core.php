@@ -80,20 +80,6 @@ function init() {
 }
 
 /**
- * Show admin notice if the Stream plugin is not present.
- *
- * @since 0.1.0
- *
- * @return void
- */
-function no_stream_notice() {
-	$class   = 'notice notice-error';
-	$message = esc_html__( 'Please install and configure the Stream plugin to use the ElasticPress Stream Connector', 'EPStream' );
-
-	printf( '<div class="%1$s"><p>%2$s</p></div>', $class, $message );
-}
-
-/**
  * Show admin notice if the ElasticPress plugin is not present.
  *
  * @since 0.1.0
@@ -102,7 +88,7 @@ function no_stream_notice() {
  */
 function no_ep_notice() {
 	$class   = 'notice notice-error';
-	$message = esc_html__( 'Please install and configure the ElasticPress plugin to use the ElasticPress Stream Connector', 'EPStream' );
+	$message = esc_html__( 'Please install and configure the ElasticPress plugin (v2.1 or greater) to use the ElasticPress Stream Connector', 'EPStream' );
 
 	printf( '<div class="%1$s"><p>%2$s</p></div>', $class, $message );
 }
