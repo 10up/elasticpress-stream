@@ -180,27 +180,28 @@ class DB_Driver_ElasticPress implements \WP_Stream\DB_Driver {
 		return array();
 	}
 
+	/**
+	 * Init storage.
+	 *
+	 * @since 0.1.0
+	 *
+	 * @param \WP_Stream\Plugin $plugin Instance of the plugin.
+	 * @return void
+	 */
+	public function setup_storage( $plugin ) {
+		// @TODO: If desired, could sync what's already in Stream into Elasticsearch here.
+	}
 
 	/**
 	 * Purge storage.
 	 *
 	 * @since 0.1.0
 	 *
+	 * @param \WP_Stream\Plugin $plugin Instance of the plugin.
 	 * @return void
 	 */
-	public function purge_storage() {
-		// @TODO: Implement method and rework class-uninstall to use this method
-	}
-
-	/**
-	 * Init storage.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @return void
-	 */
-	public function setup_storage() {
-		// @TODO: Implement method and rework class-install to use this method
+	public function purge_storage( $plugin ) {
+		// @TODO: If desired, could delete the Elasticsearch storage here, when the plugin is deactivated.
 	}
 
 }
