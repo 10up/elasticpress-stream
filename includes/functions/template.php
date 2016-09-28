@@ -195,7 +195,7 @@ function ep_stream_get_network_alias() {
 	$slug = preg_replace( '#https?://(www\.)?#i', '', $url );
 	$slug = preg_replace( '#[^\w]#', '', $slug );
 
-	$alias = 'stream-' . $slug . '-global';
+	$alias = $slug . '-stream-global';
 
 	/**
 	 * Filter the EP Stream alias.
