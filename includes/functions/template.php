@@ -94,10 +94,10 @@ function ep_stream_dependencies_met_cb() {
  */
 function ep_stream_get_index_name( $blog_id = null ) {
 	if ( function_exists( 'ep_get_index_name' ) ) {
-		return 'stream-' . ep_get_index_name( $blog_id );
+		return ep_get_index_name( $blog_id ) . '-stream';
 	}
 
-	return 'stream-default';
+	return 'default-stream';
 }
 
 /**
