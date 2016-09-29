@@ -173,9 +173,6 @@ function put_mapping() {
 	if ( ! is_wp_error( $request ) && 200 === wp_remote_retrieve_response_code( $request ) ) {
 		$response_body = wp_remote_retrieve_body( $request );
 
-		// Add into global alias
-		create_network_alias( $index );
-
 		return json_decode( $response_body );
 	}
 
@@ -200,7 +197,7 @@ function create_network_alias( $index ) {
 	$args['actions'][] = array(
 		'add' => array(
 			'index' => $index,
-			'alias' => ep_stream_get_network_alias(),
+			'alias' => ep_stream_get_index_name(),
 		),
 	);
 
