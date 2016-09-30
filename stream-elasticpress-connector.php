@@ -61,11 +61,12 @@ function ep_stream_register_module() {
 	if ( class_exists( 'EP_Config' ) && function_exists( 'ep_register_module' ) ) {
 		ep_register_module( 'stream', array(
 			'title'                    => 'ElasticPress Stream Connector',
-			'requires_install_reindex' => true,
+			'requires_install_reindex' => false,
 			'setup_cb'                 => 'ep_stream_loader',
 			'module_box_summary_cb'    => 'ep_stream_module_box_summary',
 			'module_box_long_cb'       => 'ep_stream_module_box_long',
 			'dependencies_met_cb'      => 'ep_stream_dependencies_met_cb',
+			'post_activation_cb'       => 'ep_stream_activation',
 		) );
 	} else {
 		// Show admin notice

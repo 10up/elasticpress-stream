@@ -141,6 +141,21 @@ class Query {
 								'operator'  => 'and',
 							)
 						),
+						array(
+							'multi_match' => array(
+								'query'     => $args['search'],
+								'fields'    => $search_fields,
+
+								/**
+								 * Filter the fuzziness parameter.
+								 *
+								 * @param int $fuzziness Current fuzziness argument. Default 1.
+								 * @param array $search_fields Fields to search in.
+								 * @param array $args Arguments in the query.
+								 */
+								'fuzziness' => apply_filters( 'ep_fuzziness_arg', 1, $search_fields, $args ),
+							),
+						)
 					),
 				),
 			);
@@ -153,11 +168,6 @@ class Query {
 		/**
 		 * PARSE DATE PARAM FAMILY
 		 */
-		if ( ! empty( $args['date'] ) ) {
-			$args['date_from'] = date( 'Y-m-d', strtotime( $args['date'] ) );
-			$args['date_to']   = date( 'Y-m-d', strtotime( $args['date'] ) );
-		}
-
 		if ( ! empty( $args['date_from'] ) ) {
 			$date = get_gmt_from_date( date( 'Y-m-d H:i:s', strtotime( $args['date_from'] . ' 00:00:00' ) ) );
 			$range['created']['gte'] = $date;
@@ -177,6 +187,11 @@ class Query {
 		if ( ! empty( $args['date_before'] ) ) {
 			$date = get_gmt_from_date( date( 'Y-m-d H:i:s', strtotime( $args['date_before'] ) ) );
 			$range['created']['lt'] = $date;
+		}
+
+		if ( ! empty( $args['date'] ) ) {
+			$args['date_from'] = date( 'Y-m-d', strtotime( $args['date'] ) ) . ' 00:00:00';
+			$args['date_to']   = date( 'Y-m-d', strtotime( $args['date'] ) ) . ' 23:59:59';
 		}
 
 		if ( ! empty( $range['created'] ) ) {
@@ -308,7 +323,9 @@ class Query {
 		}
 
 		$formatted_args['sort'] = array(
-			$orderby => array( 'order' => $order )
+			array(
+				$orderby => array( 'order' => $order )
+			)
 		);
 
 		/**
