@@ -368,11 +368,7 @@ class Query {
 	 * @return array
 	 */
 	public function search( $formatted_args ) {
-		if ( is_network_admin() ) {
-			$index_name = trailingslashit( ep_stream_get_network_alias() );
-		} else {
-			$index_name = trailingslashit( ep_stream_get_index_name() );
-		}
+		$index_name = trailingslashit( ep_stream_get_index_name() );
 
 		$path = $index_name . 'record/_search';
 

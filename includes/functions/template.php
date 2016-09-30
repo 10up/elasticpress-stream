@@ -85,22 +85,6 @@ function ep_stream_dependencies_met_cb() {
 }
 
 /**
- * Return stream index name for current site.
- *
- * @since 0.1.0
- *
- * @param int|null $blog_id ID of blog to get name for.
- * @return string
- */
-function ep_stream_get_index_name( $blog_id = null ) {
-	if ( function_exists( 'ep_get_index_name' ) ) {
-		return ep_get_index_name( $blog_id ) . '-stream';
-	}
-
-	return 'default-stream';
-}
-
-/**
  * A wrapper function of ElasticPress ep_check_host.
  *
  * @since 0.1.0
@@ -184,18 +168,22 @@ function ep_stream_filter_var( $var, $filter ) {
 }
 
 /**
- * Get the network alias.
+ * Get the stream index name for site.
+ *
+ * This is a global index, so if using on
+ * Multisite, all sites will use the same
+ * index name.
  *
  * @since 0.1.0
  *
  * @return mixed|void
  */
-function ep_stream_get_network_alias() {
-	$url  = network_site_url();
-	$slug = preg_replace( '#https?://(www\.)?#i', '', $url );
-	$slug = preg_replace( '#[^\w]#', '', $slug );
-
-	$alias = $slug . '-stream-global';
+function ep_stream_get_index_name() {
+	if ( function_exists( 'ep_get_network_alias' ) ) {
+		$alias = ep_get_network_alias() . '-stream';
+	} else {
+		$alias = 'default-stream';
+	}
 
 	/**
 	 * Filter the EP Stream alias.
@@ -204,7 +192,7 @@ function ep_stream_get_network_alias() {
 	 *
 	 * @param string $alias Alias name.
 	 */
-	return apply_filters( 'ep_stream_global_alias', $alias );
+	return apply_filters( 'ep_stream_index_name', $alias );
 }
 
 /**
