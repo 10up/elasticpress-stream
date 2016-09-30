@@ -323,7 +323,9 @@ class Query {
 		}
 
 		$formatted_args['sort'] = array(
-			$orderby => array( 'order' => $order )
+			array(
+				$orderby => array( 'order' => $order )
+			)
 		);
 
 		/**
