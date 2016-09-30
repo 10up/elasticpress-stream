@@ -4,6 +4,23 @@
  */
 
 /**
+ * Add our custom mapping.
+ *
+ * This only runs when the ElasticPress Stream Connector
+ * is first activated. It creates our index name and sends
+ * our custom mapping information to that index.
+ *
+ * @since 0.1.0
+ *
+ * @return void
+ */
+function ep_stream_activation() {
+	if ( ! is_wp_error( ep_stream_check_host() ) ) {
+		ElasticPress\Stream\Core\put_mapping();
+	}
+}
+
+/**
  * Load the ElasticPress Stream Connector.
  *
  * This is only ran when the ElasticPress Stream module
