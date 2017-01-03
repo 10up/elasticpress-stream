@@ -15,7 +15,7 @@
  * @return void
  */
 function ep_stream_activation() {
-	if ( ! is_wp_error( ep_stream_check_host() ) ) {
+	if ( ! empty( ep_stream_check_host() ) ) {
 		ElasticPress\Stream\Core\put_mapping();
 	}
 }
@@ -33,7 +33,7 @@ function ep_stream_activation() {
  */
 function ep_stream_loader() {
 	// If Elasticsearch isn't set up properly
-	if ( is_wp_error( ep_stream_check_host() ) ) {
+	if ( ! empty( ep_stream_check_host() ) ) {
 		// Show admin notice
 		add_action( 'admin_notices', 'ElasticPress\Stream\Core\no_es_notice' );
 
@@ -117,7 +117,7 @@ function ep_stream_requirements_status_cb( $status ) {
  */
 function ep_stream_check_host() {
 	if ( function_exists( 'ep_check_host' ) ) {
-		return ep_check_host();
+		return ep_get_elasticsearch_version();
 	}
 
 	return false;
