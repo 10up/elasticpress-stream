@@ -45,13 +45,13 @@ function ep_stream_loader() {
 }
 
 /**
- * Output the module box summary.
+ * Output the feature box summary.
  *
  * @since 0.1.0
  *
  * @return void
  */
-function ep_stream_module_box_summary() {
+function ep_stream_feature_box_summary() {
 ?>
 
 	<p>
@@ -62,13 +62,13 @@ function ep_stream_module_box_summary() {
 }
 
 /**
- * Output the module box long description.
+ * Output the feature box long description.
  *
  * @since 0.1.0
  *
  * @return void
  */
-function ep_stream_module_box_long() {
+function ep_stream_feature_box_long() {
 ?>
 
 	<p>
@@ -89,16 +89,23 @@ function ep_stream_module_box_long() {
 /**
  * Make sure Stream is active before we activate the module.
  *
+ * @param EP_Feature_Requirements_Status $status
  * @since 0.1.0
  *
  * @return bool|WP_Error
  */
-function ep_stream_dependencies_met_cb() {
+function ep_stream_requirements_status_cb( $status ) {
+	$host = ep_get_host();
+
 	if ( ! class_exists( 'WP_Stream\Plugin' ) ) {
-		return new WP_Error( 'ep-no-stream', esc_html__( 'Please install and configure the Stream plugin to use this module.', 'EPStream' ) );
+		$status->code = 2;
+		$status->message = esc_html__( 'Please install and configure the Stream plugin to use this module.', 'EPStream' );
+	} elseif ( ! preg_match( '#elasticpress\.io#i', $host ) ) {
+		$status->code = 1;
+		$status->message = __( "You aren't using <a href='https://elasticpress.io'>ElasticPress.io</a> so we can't be sure your Elasticsearch instance is secure.", 'elasticpress' );
 	}
 
-	return true;
+	return $status;
 }
 
 /**

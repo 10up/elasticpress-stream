@@ -1,7 +1,7 @@
-=== Stream ElasticPress Connector ===
-Contributors:      Faishal Saiyed
+=== ElasticPress Stream ===
+Contributors:      Faishal Saiyed, 10up
 Donate link:       http://10up.com
-Tags: 
+Tags:
 Requires at least: 4.5
 Tested up to:      4.5
 Stable tag:        0.1.0

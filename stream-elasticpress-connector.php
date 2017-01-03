@@ -1,8 +1,8 @@
 <?php
 /**
- * Plugin Name: Stream ElasticPress Connector
+ * Plugin Name: ElasticPress Stream
  * Plugin URI:  http://10up.com
- * Description: Stream ElasticPress Connector
+ * Description: ElasticPress Stream
  * Version:     0.1.0
  * Author:      10up, Faishal
  * Author URI:  http://10up.com
@@ -58,14 +58,14 @@ require_once EPSTREAM_INC . 'functions/core.php';
  * @return void
  */
 function ep_stream_register_module() {
-	if ( class_exists( 'EP_Config' ) && function_exists( 'ep_register_module' ) ) {
-		ep_register_module( 'stream', array(
+	if ( class_exists( 'EP_Config' ) && function_exists( 'ep_register_feature' ) ) {
+		ep_register_feature( 'stream', array(
 			'title'                    => 'ElasticPress Stream Connector',
 			'requires_install_reindex' => false,
 			'setup_cb'                 => 'ep_stream_loader',
-			'module_box_summary_cb'    => 'ep_stream_module_box_summary',
-			'module_box_long_cb'       => 'ep_stream_module_box_long',
-			'dependencies_met_cb'      => 'ep_stream_dependencies_met_cb',
+			'feature_box_summary_cb'   => 'ep_stream_feature_box_summary',
+			'feature_box_long_cb'      => 'ep_stream_feature_box_long',
+			'requirements_status_cb'   => 'ep_stream_requirements_status_cb',
 			'post_activation_cb'       => 'ep_stream_activation',
 		) );
 	} else {
