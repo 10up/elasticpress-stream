@@ -57,20 +57,15 @@ require_once EPSTREAM_INC . 'functions/core.php';
  *
  * @return void
  */
-function ep_stream_register_module() {
-	if ( class_exists( 'EP_Config' ) && function_exists( 'ep_register_feature' ) ) {
-		ep_register_feature( 'stream', array(
-			'title'                    => 'ElasticPress Stream Connector',
-			'requires_install_reindex' => false,
-			'setup_cb'                 => 'ep_stream_loader',
-			'feature_box_summary_cb'   => 'ep_stream_feature_box_summary',
-			'feature_box_long_cb'      => 'ep_stream_feature_box_long',
-			'requirements_status_cb'   => 'ep_stream_requirements_status_cb',
-			'post_activation_cb'       => 'ep_stream_activation',
-		) );
-	} else {
-		// Show admin notice
-		add_action( 'admin_notices', 'ElasticPress\Stream\Core\no_ep_notice' );
-	}
+function ep_stream_register_feature() {
+	ep_register_feature( 'stream', array(
+		'title'                    => 'ElasticPress Stream Connector',
+		'requires_install_reindex' => true,
+		'setup_cb'                 => 'ep_stream_loader',
+		'feature_box_summary_cb'   => 'ep_stream_feature_box_summary',
+		'feature_box_long_cb'      => 'ep_stream_feature_box_long',
+		'requirements_status_cb'   => 'ep_stream_requirements_status_cb',
+		'post_activation_cb'       => 'ep_stream_activation',
+	) );
 }
-add_action( 'plugins_loaded', 'ep_stream_register_module', 5 );
+add_action( 'ep_setup_features', 'ep_stream_register_feature', 5 );
