@@ -23,7 +23,7 @@ class DB_Driver_ElasticPress implements \WP_Stream\DB_Driver {
 	 */
 	public function __construct() {
 		$this->query      = new Query( $this );
-		$this->index_name = trailingslashit( \ep_stream_get_index_name() );
+		$this->index_name = trailingslashit( \ElasticPress\Stream\Core\get_index_name() );
 	}
 
 	/**
@@ -35,6 +35,7 @@ class DB_Driver_ElasticPress implements \WP_Stream\DB_Driver {
 	 * @return int
 	 */
 	public function insert_record( $data = array() ) {
+
 		// Return if importing
 		if ( defined( 'WP_IMPORTING' ) && WP_IMPORTING ) {
 			return 0;
@@ -46,7 +47,7 @@ class DB_Driver_ElasticPress implements \WP_Stream\DB_Driver {
 
 			// Insert record meta
 			foreach ( (array) $meta as $meta_key => $meta_values ) {
-				$data['meta'][ $meta_key ] = ep_stream_prepare_meta_value_types( $meta_values );
+				$data['meta'][ $meta_key ] = \EP_API::factory()->prepare_meta_value_types( $meta_values );
 			}
 		}
 
@@ -85,13 +86,13 @@ class DB_Driver_ElasticPress implements \WP_Stream\DB_Driver {
 		$path = $this->index_name . 'record';
 
 		$request_args = array(
-			'body'     => ep_stream_json_encode( $record ),
+			'body'     => \ElasticPress\Stream\Core\json_encode( $record ),
 			'method'   => 'POST',
 			'timeout'  => 15,
 			'blocking' => $blocking,
 		);
 
-		$request = ep_stream_remote_request( $path, $request_args );
+		$request = ep_remote_request( $path, $request_args );
 
 		if ( ! is_wp_error( $request ) ) {
 			$response_body = wp_remote_retrieve_body( $request );
@@ -143,14 +144,14 @@ class DB_Driver_ElasticPress implements \WP_Stream\DB_Driver {
 			),
 		);
 
-		$path = ep_stream_get_index_name() . '/record/_search';
+		$path = \ElasticPress\Stream\Core\get_index_name() . '/record/_search';
 
 		$request_args = array(
-			'body'   => ep_stream_json_encode( $formatted_args ),
+			'body'   => \ElasticPress\Stream\Core\json_encode( $formatted_args ),
 			'method' => 'POST',
 		);
 
-		$request = ep_stream_remote_request( $path, $request_args );
+		$request = ep_remote_request( $path, $request_args );
 		$result  = array();
 
 		if ( ! is_wp_error( $request ) ) {

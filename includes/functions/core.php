@@ -13,20 +13,146 @@ function setup() {
 		return __NAMESPACE__ . "\\$function";
 	};
 
-	add_action( 'init', $n( 'i18n' ) );
-	add_action( 'init', $n( 'init' ) );
+	add_action( 'init', $n( 'i18n' ) );\
 	add_filter( 'wp_stream_db_driver', $n( 'driver' ) );
 	add_action( 'ep_cli_put_mapping', $n( 'put_mapping' ) );
 	add_action( 'ep_put_mapping', $n( 'put_mapping' ) );
-	add_action( 'ep_create_network_alias', $n( 'create_network_alias' ) );
 	add_action( 'wp_stream_no_tables', '__return_true' );
+}
+
+/**
+ * Add our custom mapping.
+ *
+ * This only runs when the ElasticPress Stream Connector
+ * is first activated. It creates our index name and sends
+ * our custom mapping information to that index.
+ *
+ * @since 0.1.0
+ *
+ * @return void
+ */
+function activation() {
+	$version = ep_get_elasticsearch_version();
+
+	if ( ! empty( $version ) ) {
+		\ElasticPress\Stream\Core\put_mapping();
+	}
+}
+
+/**
+ * Output the feature box summary.
+ *
+ * @since 0.1.0
+ *
+ * @return void
+ */
+function feature_box_summary() {
+?>
+
+	<p>
+		<?php esc_html_e( 'Increase the performance of Stream, as this module stores and retrieves data from within Elasticsearch, not the database.', 'elasticpress-stream' ); ?>
+	</p>
+
+<?php
+}
+
+/**
+ * Output the feature box long description.
+ *
+ * @since 0.1.0
+ *
+ * @return void
+ */
+function feature_box_long() {
+?>
+
+	<p>
+		<?php esc_html_e( 'With Stream, you\'re never left in the dark about WordPress Admin activity. Every logged-in user action is displayed in an activity stream and organised for easy filtering by User, Role, Context, Action or IP address.', 'elasticpress-stream' ); ?>
+	</p>
+
+	<p>
+		<?php esc_html_e( 'This is perfect for keeping tabs on what gets changed on your site. When something breaks, Stream is there to help. See what changed and who changed it. The problem is, all this information is stored in the database, making a lot of extra read/write calls.', 'elasticpress-stream' ); ?>
+	</p>
+
+	<p>
+		<?php esc_html_e( 'Using the ElasticPress Stream module in conjunction with Stream will speed things up tremendously. All data is stored and retrieved in Elasticsearch, using the ElasticPress API.', 'elasticpress-stream' ); ?>
+	</p>
+
+<?php
+}
+
+/**
+ * Make sure Stream is active before we activate the module.
+ *
+ * @param EP_Feature_Requirements_Status $status
+ * @since 0.1.0
+ *
+ * @return bool|WP_Error
+ */
+function requirements_status_cb( $status ) {
+	$host = ep_get_host();
+
+	if ( ! class_exists( 'WP_Stream\Plugin' ) ) {
+		$status->code = 2;
+		$status->message = esc_html__( 'Please install and configure the Stream plugin to use this module.', 'elasticpress-stream' );
+	} elseif ( ! preg_match( '#elasticpress\.io#i', $host ) ) {
+		$status->code = 1;
+		$status->message = __( "You aren't using <a href='https://elasticpress.io'>ElasticPress.io</a> so we can't be sure your Elasticsearch instance is secure.", 'elasticpress' );
+	}
+
+	return $status;
+}
+
+/**
+ * Helper function to encode json
+ *
+ * @since 0.1.0
+ *
+ * @param string $record Record to encode.
+ * @return false|mixed|string|void
+ */
+function json_encode( $record ) {
+	if ( function_exists( 'wp_json_encode' ) ) {
+		$encoded_record = wp_json_encode( $record );
+	} else {
+		$encoded_record = json_encode( $record );
+	}
+
+	return $encoded_record;
+}
+
+/**
+ * Get the stream index name for site.
+ *
+ * This is a global index, so if using on
+ * Multisite, all sites will use the same
+ * index name.
+ *
+ * @since 0.1.0
+ *
+ * @return mixed|void
+ */
+function get_index_name() {
+	$blog_id = get_current_blog_id();
+	$site_url = get_site_url();
+
+	$index_name = preg_replace( '#https?://(www\.)?#i', '', $site_url );
+	$index_name = preg_replace( '#[^\w]#', '', $index_name );
+
+	if ( defined( 'EP_IS_NETWORK' ) && EP_IS_NETWORK ) {
+		$index_name .= '-global';
+	} else {
+		$index_name .= '-' . $blog_id;
+	}
 
 	/**
-	 * Fires after the plugin is loaded.
+	 * Filter the EP Stream alias.
 	 *
 	 * @since 0.1.0
+	 *
+	 * @param string $alias Alias name.
 	 */
-	do_action( 'EPStream_loaded' );
+	return apply_filters( 'ep_stream_index_name', $index_name );
 }
 
 /**
@@ -57,41 +183,20 @@ function driver( $default_driver ) {
  * @return void
  */
 function i18n() {
-	$locale = apply_filters( 'plugin_locale', get_locale(), 'EPStream' );
-	load_textdomain( 'EPStream', WP_LANG_DIR . '/EPStream/EPStream-' . $locale . '.mo' );
-	load_plugin_textdomain( 'EPStream', false, plugin_basename( EPSTREAM_PATH ) . '/languages/' );
+	$locale = apply_filters( 'plugin_locale', get_locale(), 'elasticpress-stream' );
+	load_textdomain( 'elasticpress-stream', WP_LANG_DIR . '/EPStream/EPStream-' . $locale . '.mo' );
+	load_plugin_textdomain( 'elasticpress-Stream', false, plugin_basename( EPSTREAM_PATH ) . '/languages/' );
 }
 
 /**
- * Initializes the plugin.
+ * Delete Stream ES index
  *
  * @since 0.1.0
  *
- * @return void
+ * @return bool
  */
-function init() {
-
-	/**
-	 * Fires when the plugin is initialized.
-	 *
-	 * @since 0.1.0
-	 */
-	do_action( 'EPStream_init' );
-}
-
-/**
- * Show admin notice if Elasticsearch isn't setup properly.
- *
- * @since 0.1.0
- *
- * @return void
- */
-function no_es_notice() {
-	$class   = 'notice notice-error';
-	$active  = ep_stream_check_host();
-	$message = ! empty( $active ) ? $active->get_error_message() : esc_html__( 'Please configure and run an index on Elasticsearch to use the ElasticPress Stream Connector', 'EPStream' );
-
-	printf( '<div class="%1$s"><p>%2$s</p></div>', $class, $message );
+function delete_index() {
+	return ep_delete_index( get_index_name() );
 }
 
 /**
@@ -147,55 +252,19 @@ function put_mapping() {
 	 */
 	$mapping = apply_filters( 'ep_stream_config_mapping', $mapping );
 
-	$index = ep_stream_get_index_name();
+	$index = get_index_name();
 
 	$request_args = array(
 		'body'   => json_encode( $mapping ),
 		'method' => 'PUT',
 	);
 
-	$request = ep_stream_remote_request( $index, $request_args );
+	$request = ep_remote_request( $index, $request_args );
 
 	if ( ! is_wp_error( $request ) && 200 === wp_remote_retrieve_response_code( $request ) ) {
 		$response_body = wp_remote_retrieve_body( $request );
 
 		return json_decode( $response_body );
-	}
-
-	return false;
-}
-
-/**
- * Add the index into the network alias.
- *
- * @since 0.1.0
- *
- * @param string $index Name of index.
- * @return bool
- */
-function create_network_alias( $index ) {
-	$path = '_aliases';
-
-	$args = array(
-		'actions' => array(),
-	);
-
-	$args['actions'][] = array(
-		'add' => array(
-			'index' => $index,
-			'alias' => ep_stream_get_index_name(),
-		),
-	);
-
-	$request_args = array(
-		'body'   => json_encode( $args ),
-		'method' => 'POST',
-	);
-
-	$request = ep_stream_remote_request( $path, $request_args );
-
-	if ( ! is_wp_error( $request ) && ( 200 >= wp_remote_retrieve_response_code( $request ) && 300 > wp_remote_retrieve_response_code( $request ) ) ) {
-		return true;
 	}
 
 	return false;

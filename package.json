@@ -1,5 +1,5 @@
 {
-  "name": "epstream",
+  "name": "elasticpress-stream",
   "title": "Stream ElasticPress Connector",
   "description": "Store Stream data in Elasticsearch, using ElasticPress",
   "version": "0.1.0",

@@ -47,7 +47,7 @@ class Query {
 
 		// Sanitize ip if set
 		if ( ! empty( $args['ip'] ) ) {
-			$args['ip'] = ep_stream_filter_var( $args['ip'], FILTER_VALIDATE_IP );
+			$args['ip'] = wp_stream_filter_var( $args['ip'], FILTER_VALIDATE_IP );
 		}
 
 		// Allowed fields and validate function mapping
@@ -368,7 +368,7 @@ class Query {
 	 * @return array
 	 */
 	public function search( $formatted_args ) {
-		$index_name = trailingslashit( ep_stream_get_index_name() );
+		$index_name = trailingslashit( \ElasticPress\Stream\Core\get_index_name() );
 
 		$path = $index_name . 'record/_search';
 
@@ -377,7 +377,7 @@ class Query {
 			'method' => 'POST',
 		);
 
-		$request = ep_stream_remote_request( $path, $request_args );
+		$request = ep_remote_request( $path, $request_args );
 		$result  = array( 'items' => array(), 'count' => 0 );
 
 		if ( ! is_wp_error( $request ) ) {
@@ -422,5 +422,4 @@ class Query {
 
 		return $result;
 	}
-
 }

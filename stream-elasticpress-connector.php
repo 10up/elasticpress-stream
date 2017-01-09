@@ -6,7 +6,7 @@
  * Version:     0.1.0
  * Author:      10up, Faishal
  * Author URI:  http://10up.com
- * Text Domain: EPStream
+ * Text Domain: elasticpress-stream
  * Domain Path: /languages
  * License:     GPL-2.0+
  */
@@ -42,8 +42,14 @@ define( 'EPSTREAM_PATH', dirname( __FILE__ ) . '/' );
 define( 'EPSTREAM_INC', EPSTREAM_PATH . 'includes/' );
 
 // Include core file
-require_once EPSTREAM_INC . 'functions/template.php';
 require_once EPSTREAM_INC . 'functions/core.php';
+
+/**
+ * WP CLI Commands
+ */
+if ( defined( 'WP_CLI' ) && WP_CLI ) {
+	require_once( dirname( __FILE__ ) . '/bin/wp-cli.php' );
+}
 
 /**
  * Register the ElasticPress Stream module.
@@ -51,7 +57,7 @@ require_once EPSTREAM_INC . 'functions/core.php';
  * Only register this if the ElasticPress plugin
  * is active and the ep_register_module function
  * is present, meaning ElasticPress is the proper
- * version (>= 2.1).
+ * version (>= 2.2).
  *
  * @since 0.1.0
  *
@@ -60,12 +66,12 @@ require_once EPSTREAM_INC . 'functions/core.php';
 function ep_stream_register_feature() {
 	ep_register_feature( 'stream', array(
 		'title'                    => 'ElasticPress Stream Connector',
-		'requires_install_reindex' => true,
-		'setup_cb'                 => 'ep_stream_loader',
-		'feature_box_summary_cb'   => 'ep_stream_feature_box_summary',
-		'feature_box_long_cb'      => 'ep_stream_feature_box_long',
-		'requirements_status_cb'   => 'ep_stream_requirements_status_cb',
-		'post_activation_cb'       => 'ep_stream_activation',
+		'requires_install_reindex' => false,
+		'setup_cb'                 => '\ElasticPress\Stream\Core\setup',
+		'feature_box_summary_cb'   => '\ElasticPress\Stream\Core\feature_box_summary',
+		'feature_box_long_cb'      => '\ElasticPress\Stream\Core\feature_box_long',
+		'requirements_status_cb'   => '\ElasticPress\Stream\Core\requirements_status_cb',
+		'post_activation_cb'       => '\ElasticPress\Stream\Core\activation',
 	) );
 }
 add_action( 'ep_setup_features', 'ep_stream_register_feature', 5 );
