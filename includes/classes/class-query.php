@@ -368,7 +368,13 @@ class Query {
 	 * @return array
 	 */
 	public function search( $formatted_args ) {
-		$index_name = trailingslashit( \ElasticPress\Stream\Core\get_index_name() );
+		if ( is_network_admin() ) {
+			$index = \ElasticPress\Stream\Core\get_network_alias();
+		} else {
+			$index = \ElasticPress\Stream\Core\get_index_name();
+		}
+
+		$index_name = trailingslashit( $index );
 
 		$path = $index_name . 'record/_search';
 

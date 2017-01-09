@@ -24,86 +24,82 @@ class ElasticPress_Stream_CLI_Command extends \WP_CLI_Command {
 	public function setup( $args, $assoc_args ) {
 		$this->_connect_check();
 
-		\WP_CLI::line( esc_html__( 'Deleting current index...', 'elasticpress' ) );
+		if ( isset( $assoc_args['network-wide'] ) && is_multisite() ) {
+			if ( ! is_numeric( $assoc_args['network-wide'] ) ){
+				$assoc_args['network-wide'] = 0;
+			}
 
-		\ElasticPress\Stream\Core\delete_index();
+			$sites = ep_get_sites( $assoc_args['network-wide'] );
 
-		\WP_CLI::line( esc_html__( 'Putting mapping...', 'elasticpress' ) );
+			foreach ( $sites as $site ) {
+				switch_to_blog( $site['blog_id'] );
 
-		$result = \ElasticPress\Stream\Core\put_mapping();
+				\WP_CLI::line( sprintf( esc_html__( 'Deleting current index for site %s', 'elasticpress-stream' ), (int) $site['blog_id'] ) );
 
-		if ( empty( $result ) ) {
-			\WP_CLI::error( esc_html__( 'ElasticPress Stream unsuccessfully set up.', 'elasticpress' ) );
-		} else {
-			\WP_CLI::success( esc_html__( 'ElasticPress Stream successfully set up.', 'elasticpress' ) );
-		}
-	}
+				// Deletes index first
+				\ElasticPress\Stream\Core\delete_index();
 
+				$result = \ElasticPress\Stream\Core\put_mapping();
 
-	/**
-	 * Resets some values to reduce memory footprint.
-	 *
-	 * @since 0.1.0
-	 */
-	public function stop_the_insanity() {
-		global $wpdb, $wp_object_cache, $wp_actions, $wp_filter;
-
-		$wpdb->queries = array();
-
-		if ( is_object( $wp_object_cache ) ) {
-			$wp_object_cache->group_ops = array();
-			$wp_object_cache->stats = array();
-			$wp_object_cache->memcache_debug = array();
-
-			// Make sure this is a public property, before trying to clear it
-			try {
-				$cache_property = new ReflectionProperty( $wp_object_cache, 'cache' );
-				if ( $cache_property->isPublic() ) {
-					$wp_object_cache->cache = array();
+				if ( $result ) {
+					\WP_CLI::success( sprintf( esc_html__( 'Mapping sent for site %s', 'elasticpress-stream' ), (int) $site['blog_id'] ) );
+				} else {
+					\WP_CLI::error( esc_html__( 'Mapping failed', 'elasticpress-stream' ) );
 				}
-				unset( $cache_property );
-			} catch ( ReflectionException $e ) {
+
+				$result = \ElasticPress\Stream\Core\create_network_alias( \ElasticPress\Stream\Core\get_index_name() );
+
+				if ( empty( $result ) ) {
+					\WP_CLI::error( sprintf( esc_html__( 'Network alias failed for site %s.', 'elasticpress-stream' ), (int) $site['blog_id'] ) );
+				} else {
+					\WP_CLI::success( sprintf( esc_html__( 'Network alias sent for site %s.', 'elasticpress-stream' ), (int) $site['blog_id'] ) );
+				}
+
+				restore_current_blog();
 			}
 
-			/*
-			 * In the case where we're not using an external object cache, we need to call flush on the default
-			 * WordPress object cache class to clear the values from the cache property
-			 */
-			if ( ! wp_using_ext_object_cache() ) {
-				wp_cache_flush();
-			}
+			// Create global index
 
-			if ( is_callable( $wp_object_cache, '__remoteset' ) ) {
-				call_user_func( array( $wp_object_cache, '__remoteset' ) ); // important
-			}
-		}
+			\WP_CLI::line( esc_html__( 'Deleting current index for network admin', 'elasticpress-stream' ) );
 
-		// Prevent wp_actions from growing out of control
-		$wp_actions = array();
+			\ElasticPress\Stream\Core\delete_index( 0 );
 
-		// WP_Query class adds filter get_term_metadata using its own instance
-		// what prevents WP_Query class from being destructed by PHP gc.
-		//    if ( $q['update_post_term_cache'] ) {
-		//        add_filter( 'get_term_metadata', array( $this, 'lazyload_term_meta' ), 10, 2 );
-		//    }
-		// It's high memory consuming as WP_Query instance holds all query results inside itself
-		// and in theory $wp_filter will not stop growing until Out Of Memory exception occurs.
-		if ( isset( $wp_filter['get_term_metadata'] ) ) {
-			/*
-			 * WordPress 4.7 has a new Hook infrastructure, so we need to make sure
-			 * we're accessing the global array properly
-			 */
-			if ( class_exists( 'WP_Hook' ) && $wp_filter['get_term_metadata'] instanceof WP_Hook ) {
-				$filter_callbacks   = &$wp_filter['get_term_metadata']->callbacks;
+			$result = \ElasticPress\Stream\Core\put_mapping( 0 );
+
+			if ( $result ) {
+				\WP_CLI::success( __( 'Mapping sent for network admin', 'elasticpress-stream' ) );
 			} else {
-				$filter_callbacks   = &$wp_filter['get_term_metadata'];
+				\WP_CLI::error( __( 'Mapping failed', 'elasticpress-stream' ) );
 			}
-			if ( isset( $filter_callbacks[10] ) ) {
-				foreach ( $filter_callbacks[10] as $hook => $content ) {
-					if ( preg_match( '#^[0-9a-f]{32}lazyload_term_meta$#', $hook ) ) {
-						unset( $filter_callbacks[10][ $hook ] );
-					}
-				}
+
+			$result = \ElasticPress\Stream\Core\create_network_alias( \ElasticPress\Stream\Core\get_index_name( 0 ) );
+
+			if ( empty( $result ) ) {
+				\WP_CLI::error( esc_html__( 'Network alias failed for network admin.', 'elasticpress-stream' ) );
+			} else {
+				\WP_CLI::success( esc_html__( 'Network alias sent for network admin.', 'elasticpress-stream' ) );
+			}
+		} else {
+			\WP_CLI::line( esc_html__( 'Deleting current index...', 'elasticpress-stream' ) );
+
+			\ElasticPress\Stream\Core\delete_index();
+
+			\WP_CLI::line( esc_html__( 'Putting mapping...', 'elasticpress-stream' ) );
+
+			$result = \ElasticPress\Stream\Core\put_mapping();
+
+			if ( empty( $result ) ) {
+				\WP_CLI::error( esc_html__( 'Mapping failed.', 'elasticpress' ) );
+			} else {
+				\WP_CLI::success( esc_html__( 'Mapping sent.', 'elasticpress' ) );
+			}
+
+			$result = \ElasticPress\Stream\Core\create_network_alias( \ElasticPress\Stream\Core\get_index_name() );
+
+			if ( empty( $result ) ) {
+				\WP_CLI::error( esc_html__( 'Network alias failed.', 'elasticpress-stream' ) );
+			} else {
+				\WP_CLI::success( esc_html__( 'Network alias sent.', 'elasticpress-stream' ) );
 			}
 		}
 	}
@@ -117,9 +113,9 @@ class ElasticPress_Stream_CLI_Command extends \WP_CLI_Command {
 		$host = ep_get_host();
 
 		if ( empty( $host) ) {
-			\WP_CLI::error( __( 'There is no Elasticsearch host set up. Either add one through the dashboard or define one in wp-config.php', 'elasticpress' ) );
+			\WP_CLI::error( esc_html__( 'There is no Elasticsearch host set up. Either add one through the dashboard or define one in wp-config.php', 'elasticpress' ) );
 		} elseif ( ! ep_get_elasticsearch_version() ) {
-			\WP_CLI::error( __( 'Unable to reach Elasticsearch Server! Check that service is running.', 'elasticpress' ) );
+			\WP_CLI::error( esc_html__( 'Unable to reach Elasticsearch Server! Check that service is running.', 'elasticpress' ) );
 		}
 	}
 }

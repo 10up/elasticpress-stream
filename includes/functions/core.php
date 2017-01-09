@@ -122,37 +122,48 @@ function json_encode( $record ) {
 }
 
 /**
- * Get the stream index name for site.
- *
- * This is a global index, so if using on
- * Multisite, all sites will use the same
- * index name.
+ * Get the stream index name for site or network admin.
  *
  * @since 0.1.0
- *
+ * @param  int blog_id
  * @return mixed|void
  */
-function get_index_name() {
-	$blog_id = get_current_blog_id();
+function get_index_name( $blog_id = null ) {
 	$site_url = get_site_url();
+
+	if ( null === $blog_id ) {
+		$blog_id = get_current_blog_id();
+
+		if ( defined( 'EP_IS_NETWORK' ) && EP_IS_NETWORK && is_network_admin() ) {
+			$blog_id = 0; // 0 denotes network admin index
+			$site_url = network_site_url();
+		}
+	}
 
 	$index_name = preg_replace( '#https?://(www\.)?#i', '', $site_url );
 	$index_name = preg_replace( '#[^\w]#', '', $index_name );
 
-	if ( defined( 'EP_IS_NETWORK' ) && EP_IS_NETWORK ) {
-		$index_name .= '-global';
-	} else {
-		$index_name .= '-' . $blog_id;
-	}
+	$index_name .= '-' . $blog_id . '-stream';
 
-	/**
-	 * Filter the EP Stream alias.
-	 *
-	 * @since 0.1.0
-	 *
-	 * @param string $alias Alias name.
-	 */
 	return apply_filters( 'ep_stream_index_name', $index_name );
+}
+
+
+/**
+ * Get stream network alias
+ *
+ * @since  0.1.0
+ * @return string
+ */
+function get_network_alias() {
+	$url = network_site_url();
+
+	$slug = preg_replace( '#https?://(www\.)?#i', '', $url );
+	$slug = preg_replace( '#[^\w]#', '', $slug );
+
+	$alias = $slug . '-global-stream';
+
+	return apply_filters( 'ep_stream_global_alias', $alias );
 }
 
 /**
@@ -192,21 +203,21 @@ function i18n() {
  * Delete Stream ES index
  *
  * @since 0.1.0
- *
+ * @param  int $blog_id
  * @return bool
  */
-function delete_index() {
-	return ep_delete_index( get_index_name() );
+function delete_index( $blog_id = null ) {
+	return ep_delete_index( get_index_name( $blog_id ) );
 }
 
 /**
  * Insert mapping for Stream into Elasticsearch.
  *
- * @since 0.1.0
- *
+ * @since  0.1.0
+ * @param  int $blog_id
  * @return bool
  */
-function put_mapping() {
+function put_mapping( $blog_id = null ) {
 	/**
 	 * Filter the EP Stream mapping file.
 	 *
@@ -252,7 +263,7 @@ function put_mapping() {
 	 */
 	$mapping = apply_filters( 'ep_stream_config_mapping', $mapping );
 
-	$index = get_index_name();
+	$index = get_index_name( $blog_id );
 
 	$request_args = array(
 		'body'   => json_encode( $mapping ),
@@ -265,6 +276,42 @@ function put_mapping() {
 		$response_body = wp_remote_retrieve_body( $request );
 
 		return json_decode( $response_body );
+	}
+
+	return false;
+}
+
+/**
+ * Add the index into the network alias.
+ *
+ * @since 0.1.0
+ *
+ * @param string $index Name of index.
+ * @return bool
+ */
+function create_network_alias( $index ) {
+	$path = '_aliases';
+
+	$args = array(
+		'actions' => array(),
+	);
+
+	$args['actions'][] = array(
+		'add' => array(
+			'index' => $index,
+			'alias' => get_network_alias(),
+		),
+	);
+
+	$request_args = array(
+		'body'   => json_encode( $args ),
+		'method' => 'POST',
+	);
+
+	$request = ep_remote_request( $path, $request_args );
+
+	if ( ! is_wp_error( $request ) && ( 200 >= wp_remote_retrieve_response_code( $request ) && 300 > wp_remote_retrieve_response_code( $request ) ) ) {
+		return true;
 	}
 
 	return false;
