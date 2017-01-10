@@ -18,6 +18,7 @@ function setup() {
 	add_action( 'ep_cli_put_mapping', $n( 'put_mapping' ) );
 	add_action( 'ep_put_mapping', $n( 'put_mapping' ) );
 	add_action( 'wp_stream_no_tables', '__return_true' );
+	add_action( 'wp_stream_erase_records', $n( 'erase_records' ) );
 }
 
 /**
@@ -197,6 +198,29 @@ function i18n() {
 	$locale = apply_filters( 'plugin_locale', get_locale(), 'elasticpress-stream' );
 	load_textdomain( 'elasticpress-stream', WP_LANG_DIR . '/EPStream/EPStream-' . $locale . '.mo' );
 	load_plugin_textdomain( 'elasticpress-Stream', false, plugin_basename( EPSTREAM_PATH ) . '/languages/' );
+}
+
+/**
+ * Erase all stream records
+ *
+ * @since 0.1.0
+ */
+function erase_records() {
+	if ( defined( 'EP_IS_NETWORK' ) && EP_IS_NETWORK ) {
+		$sites = ep_get_sites();
+
+		foreach ( $sites as $site ) {
+			switch_to_blog( $site['blog_id'] );
+
+			delete_index();
+
+			restore_current_blog();
+		}
+
+		delete_index( 0 );
+	} else {
+		delete_index();
+	}
 }
 
 /**
