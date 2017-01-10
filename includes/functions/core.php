@@ -51,7 +51,7 @@ function feature_box_summary() {
 ?>
 
 	<p>
-		<?php esc_html_e( 'Increase the performance of Stream, as this module stores and retrieves data from within Elasticsearch, not the database.', 'elasticpress-stream' ); ?>
+		<?php _e( 'Increase the performance of <a href="http://wp-stream.com/">Stream</a>, as this module stores and retrieves data from within Elasticsearch, not the database.', 'elasticpress-stream' ); ?>
 	</p>
 
 <?php
@@ -95,7 +95,7 @@ function requirements_status_cb( $status ) {
 
 	if ( ! class_exists( 'WP_Stream\Plugin' ) ) {
 		$status->code = 2;
-		$status->message = esc_html__( 'Please install and configure the Stream plugin to use this module.', 'elasticpress-stream' );
+		$status->message = __( 'Please install and configure the <a href="http://wp-stream.com/">Stream plugin</a> to use this module.', 'elasticpress-stream' );
 	} elseif ( ! preg_match( '#elasticpress\.io#i', $host ) ) {
 		$status->code = 1;
 		$status->message = __( "You aren't using <a href='https://elasticpress.io'>ElasticPress.io</a> so we can't be sure your Elasticsearch instance is secure.", 'elasticpress' );

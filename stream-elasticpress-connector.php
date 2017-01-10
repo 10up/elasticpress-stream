@@ -65,7 +65,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
  */
 function ep_stream_register_feature() {
 	ep_register_feature( 'stream', array(
-		'title'                    => 'ElasticPress Stream Connector',
+		'title'                    => 'Stream',
 		'requires_install_reindex' => false,
 		'setup_cb'                 => '\ElasticPress\Stream\Core\setup',
 		'feature_box_summary_cb'   => '\ElasticPress\Stream\Core\feature_box_summary',
