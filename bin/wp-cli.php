@@ -15,13 +15,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 class ElasticPress_Stream_CLI_Command extends \WP_CLI_Command {
 
 	/**
-	 * Setup plugin with index and mapping
+	 * Put plugin mappings and alias
 	 *
+	 * @synopsis [--setup] [--network-wide]
+	 * @subcommand put-mapping
 	 * @since       0.1.0
 	 * @param array $args
 	 * @param array $assoc_args
 	 */
-	public function setup( $args, $assoc_args ) {
+	public function put_mapping( $args, $assoc_args ) {
 		$this->_connect_check();
 
 		if ( isset( $assoc_args['network-wide'] ) && is_multisite() ) {
@@ -36,8 +38,10 @@ class ElasticPress_Stream_CLI_Command extends \WP_CLI_Command {
 
 				\WP_CLI::line( sprintf( esc_html__( 'Deleting current index for site %s', 'elasticpress-stream' ), (int) $site['blog_id'] ) );
 
-				// Deletes index first
-				\ElasticPress\Stream\Core\delete_index();
+				if ( ! empty( $assoc_args['setup'] ) ) {
+					// Deletes index first
+					\ElasticPress\Stream\Core\delete_index();
+				}
 
 				$result = \ElasticPress\Stream\Core\put_mapping();
 
@@ -62,7 +66,9 @@ class ElasticPress_Stream_CLI_Command extends \WP_CLI_Command {
 
 			\WP_CLI::line( esc_html__( 'Deleting current index for network admin', 'elasticpress-stream' ) );
 
-			\ElasticPress\Stream\Core\delete_index( 0 );
+			if ( ! empty( $assoc_args['setup'] ) ) {
+				\ElasticPress\Stream\Core\delete_index( 0 );
+			}
 
 			$result = \ElasticPress\Stream\Core\put_mapping( 0 );
 
@@ -82,7 +88,9 @@ class ElasticPress_Stream_CLI_Command extends \WP_CLI_Command {
 		} else {
 			\WP_CLI::line( esc_html__( 'Deleting current index...', 'elasticpress-stream' ) );
 
-			\ElasticPress\Stream\Core\delete_index();
+			if ( ! empty( $assoc_args['setup'] ) ) {
+				\ElasticPress\Stream\Core\delete_index();
+			}
 
 			\WP_CLI::line( esc_html__( 'Putting mapping...', 'elasticpress-stream' ) );
 
@@ -92,14 +100,6 @@ class ElasticPress_Stream_CLI_Command extends \WP_CLI_Command {
 				\WP_CLI::error( esc_html__( 'Mapping failed.', 'elasticpress' ) );
 			} else {
 				\WP_CLI::success( esc_html__( 'Mapping sent.', 'elasticpress' ) );
-			}
-
-			$result = \ElasticPress\Stream\Core\create_network_alias( \ElasticPress\Stream\Core\get_index_name() );
-
-			if ( empty( $result ) ) {
-				\WP_CLI::error( esc_html__( 'Network alias failed.', 'elasticpress-stream' ) );
-			} else {
-				\WP_CLI::success( esc_html__( 'Network alias sent.', 'elasticpress-stream' ) );
 			}
 		}
 	}

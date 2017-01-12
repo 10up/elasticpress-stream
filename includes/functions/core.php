@@ -36,7 +36,25 @@ function activation() {
 	$version = ep_get_elasticsearch_version();
 
 	if ( ! empty( $version ) ) {
-		\ElasticPress\Stream\Core\put_mapping();
+		if ( defined( 'EP_IS_NETWORK' ) && EP_IS_NETWORK ) {
+			$sites = ep_get_sites();
+
+			foreach ( $sites as $site ) {
+				switch_to_blog( $site['blog_id'] );
+
+				put_mapping();
+
+				create_network_alias( get_index_name() );
+
+				restore_current_blog();
+			}
+
+			put_mapping( 0 );
+
+			create_network_alias( get_index_name( 0 ) );
+		} else {
+			put_mapping();
+		}
 	}
 }
 
