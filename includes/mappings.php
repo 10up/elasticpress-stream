@@ -8,45 +8,41 @@ return array(
 	'settings' => array(
 		'analysis' => array(
 			'analyzer' => array(
-				'default'       => array(
+				'default' => array(
 					'tokenizer' => 'standard',
-					'filter'    => array( 'standard', 'ewp_word_delimiter', 'lowercase', 'stop', 'ewp_snowball' ),
-
-					/**
-					 * Filter allowing to change the language used in an analyzers.
-					 *
-					 * See https://www.elastic.co/guide/en/elasticsearch/reference/current/analysis-lang-analyzer.html
-					 * Default is english
-					 *
-					 * @since 0.1.0
-					 *
-					 * @param string $language Default language.
-					 * @param string $context Context.
-					 */
-					'language'  => apply_filters( 'ep_analyzer_language', 'english', 'analyzer_default' ),
+					'filter' => array( 'standard', 'ewp_word_delimiter', 'lowercase', 'stop', 'ewp_snowball' ),
+					'language' => apply_filters( 'ep_analyzer_language', 'english', 'analyzer_default' ),
+				),
+				'shingle_analyzer' => array(
+					'type' => 'custom',
+					'tokenizer' => 'standard',
+					'filter' => array( 'lowercase', 'shingle_filter' ),
 				),
 				'ewp_lowercase' => array(
-					'type'      => 'custom',
+					'type' => 'custom',
 					'tokenizer' => 'keyword',
-					'filter'    => array( 'lowercase' ),
+					'filter' => array( 'lowercase' ),
 				),
 			),
-			'filter'   => array(
+			'filter' => array(
+				'shingle_filter' => array(
+					'type' => 'shingle',
+					'min_shingle_size' => 2,
+					'max_shingle_size' => 5,
+				),
 				'ewp_word_delimiter' => array(
-					'type'              => 'word_delimiter',
+					'type' => 'word_delimiter',
 					'preserve_original' => true,
 				),
-				'ewp_snowball'       => array(
-					'type'     => 'snowball',
-
-					/** This filter is documented in includes/mappings.php */
+				'ewp_snowball' => array(
+					'type' => 'snowball',
 					'language' => apply_filters( 'ep_analyzer_language', 'english', 'filter_ewp_snowball' ),
 				),
-				'edge_ngram'         => array(
-					'side'     => 'front',
+				'edge_ngram' => array(
+					'side' => 'front',
 					'max_gram' => 10,
 					'min_gram' => 3,
-					'type'     => 'edgeNGram',
+					'type' => 'edgeNGram',
 				),
 			),
 		),
@@ -63,51 +59,39 @@ return array(
 							'path'       => 'full',
 							'properties' => array(
 								'value'    => array(
-									'type'   => 'string',
+									'type'   => 'text',
 									'fields' => array(
 										'sortable' => array(
-											'type'           => 'string',
-											'analyzer'       => 'ewp_lowercase',
-											'include_in_all' => false,
+											'type' => 'keyword',
 										),
 										'raw'      => array(
-											'type'           => 'string',
-											'index'          => 'not_analyzed',
-											'include_in_all' => false,
+											'type' => 'keyword',
 										),
 									),
 								),
 								'raw'      => array( /* Left for backwards compat */
-									'type'           => 'string',
-									'index'          => 'not_analyzed',
-									'include_in_all' => false,
+									'type' => 'keyword',
 								),
 								'long'     => array(
 									'type'  => 'long',
-									'index' => 'not_analyzed',
 								),
 								'double'   => array(
 									'type'  => 'double',
-									'index' => 'not_analyzed',
 								),
 								'boolean'  => array(
 									'type'  => 'boolean',
-									'index' => 'not_analyzed',
 								),
 								'date'     => array(
 									'type'   => 'date',
 									'format' => 'yyyy-MM-dd',
-									'index'  => 'not_analyzed',
 								),
 								'datetime' => array(
 									'type'   => 'date',
 									'format' => 'yyyy-MM-dd HH:mm:ss',
-									'index'  => 'not_analyzed',
 								),
 								'time'     => array(
 									'type'   => 'date',
 									'format' => 'HH:mm:ss',
-									'index'  => 'not_analyzed',
 								),
 							),
 						),
@@ -120,62 +104,40 @@ return array(
 			'properties'        => array(
 				'ID'        => array(
 					'type'           => 'long',
-					'index'          => 'not_analyzed',
-					'include_in_all' => false,
 				),
 				'site_id'   => array(
 					'type'           => 'long',
-					'index'          => 'not_analyzed',
-					'include_in_all' => false,
 				),
 				'blog_id'   => array(
 					'type'           => 'long',
-					'index'          => 'not_analyzed',
-					'include_in_all' => false,
 				),
 				'object_id' => array(
 					'type'           => 'long',
-					'index'          => 'not_analyzed',
-					'include_in_all' => false,
 				),
 				'user_id'   => array(
 					'type'           => 'long',
-					'index'          => 'not_analyzed',
-					'include_in_all' => false,
 				),
 				'user_role' => array(
-					'type'           => 'string',
-					'index'          => 'not_analyzed',
-					'include_in_all' => false,
+					'type'           => 'keyword',
 				),
 				'summary'   => array(
-					'type'     => 'string',
-					'analyzer' => 'default',
+					'type'     => 'text',
 				),
 				'created'   => array(
 					'type'           => 'date',
 					'format'         => 'YYYY-MM-dd HH:mm:ss',
-					'include_in_all' => false,
 				),
 				'connector' => array(
-					'type'           => 'string',
-					'index'          => 'not_analyzed',
-					'include_in_all' => false,
+					'type'           => 'keyword',
 				),
 				'context'   => array(
-					'type'           => 'string',
-					'index'          => 'not_analyzed',
-					'include_in_all' => false,
+					'type'           => 'keyword',
 				),
 				'action'    => array(
-					'type'           => 'string',
-					'index'          => 'not_analyzed',
-					'include_in_all' => false,
+					'type'           => 'keyword',
 				),
 				'ip'        => array(
 					'type'           => 'ip',
-					'index'          => 'not_analyzed',
-					'include_in_all' => false,
 				),
 				'meta'      => array(
 					'type' => 'object',
