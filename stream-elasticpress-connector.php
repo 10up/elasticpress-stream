@@ -4,7 +4,7 @@
  * Plugin URI:  http://10up.com
  * Description: ElasticPress Stream
  * Version:     0.1.0
- * Author:      10up, Faishal
+ * Author:      10up, Faishal, Taylor Lovett
  * Author URI:  http://10up.com
  * Text Domain: elasticpress-stream
  * Domain Path: /languages

@@ -38,7 +38,9 @@ class Query {
 		);
 
 		$filter = array(
-			'and' => array(),
+			'bool' => array(
+				'must' => array(),
+			),
 		);
 
 		/**
@@ -72,7 +74,7 @@ class Query {
 				}
 
 				if ( $is_valid ) {
-					$filter['and'][] = array(
+					$filter['bool']['must'][] = array(
 						'term' => array( $field => $args[ $field ] ),
 					);
 				}
@@ -195,7 +197,7 @@ class Query {
 		}
 
 		if ( ! empty( $range['created'] ) ) {
-			$filter['and'][] = array( 'range' => $range );
+			$filter['bool']['must'][] = array( 'range' => $range );
 		}
 
 		/**
@@ -350,8 +352,8 @@ class Query {
 			}
 		}
 
-		if ( ! empty( $filter['and'] ) ) {
-			$formatted_args['filter'] = $filter;
+		if ( ! empty( $filter['bool']['must'] ) ) {
+			$formatted_args['post_filter'] = $filter;
 		}
 
 		$result = $this->search( $formatted_args );
