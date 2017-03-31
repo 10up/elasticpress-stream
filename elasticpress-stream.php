@@ -36,7 +36,7 @@
  */
 
 // Useful global constants
-define( 'EPSTREAM_VERSION', '0.1.0' );
+define( 'EPSTREAM_VERSION', '1.0.0' );
 define( 'EPSTREAM_URL', plugin_dir_url( __FILE__ ) );
 define( 'EPSTREAM_PATH', dirname( __FILE__ ) . '/' );
 define( 'EPSTREAM_INC', EPSTREAM_PATH . 'includes/' );
