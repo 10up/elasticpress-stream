@@ -215,7 +215,7 @@ function driver( $default_driver ) {
 function i18n() {
 	$locale = apply_filters( 'plugin_locale', get_locale(), 'elasticpress-stream' );
 	load_textdomain( 'elasticpress-stream', WP_LANG_DIR . '/EPStream/EPStream-' . $locale . '.mo' );
-	load_plugin_textdomain( 'elasticpress-Stream', false, plugin_basename( EPSTREAM_PATH ) . '/languages/' );
+	load_plugin_textdomain( 'elasticpress-stream', false, plugin_basename( EPSTREAM_PATH ) . '/languages/' );
 }
 
 /**
