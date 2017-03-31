@@ -19,7 +19,7 @@ The core Stream plugin stores data in MySQL which after awhile can became bloate
 ## Setup
 
 1. Install Stream. For now you will need to use the `develop` branch on [Github](https://github.com/xwp/stream).
-2. Install Elasticsearch and [ElasticPress](https://wordpress.org/plugins/elasticpress/)
+2. Install [Elasticsearch](https://www.elastic.co/products/elasticsearch) and [ElasticPress](https://wordpress.org/plugins/elasticpress/)
 3. Install ElasticPress Stream. Within the ElasticPress admin dashboard, activate the ElasticPress Stream feature.
 
 Once the ElasticPress Stream feature has been activated, Stream will start using Elasticsearch instead of MySQl. There are no settings to configure.
