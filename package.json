@@ -1,8 +1,7 @@
 {
   "name": "elasticpress-stream",
-  "title": "Stream ElasticPress Connector",
+  "title": "ElasticPress Stream",
   "description": "Store Stream data in Elasticsearch, using ElasticPress",
-  "version": "0.1.0",
   "homepage": "http://10up.com/",
   "author": {
     "name": "10up Inc",

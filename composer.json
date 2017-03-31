@@ -1,6 +1,6 @@
 {
-	"name": "Stream-elasticpress-connector",
-	"description": "Stream ElasticPress Connector",
+	"name": "elasticpress-stream",
+	"description": "ElasticPress Stream",
 	"version": "0.1.0",
 	"type": "wordpress-plugin",
 	"keywords": [],
@@ -8,19 +8,13 @@
 	"license": "GPL-2.0+",
 	"authors": [
 		{
-			"name": "Faishal Saiyed",
-			"email": "faishal@10up.com",
-			"role": "Developer"
+			"name": "10up Inc.",
+			"email": "sales@10up.com",
+			"role": "Agency"
 		}
 	],
-    "minimum-stability": "dev",
+  "minimum-stability": "dev",
 	"require": {
 		"php": ">=5.6"
-	},
-    "require-dev": {
-	    "antecedent/patchwork": "1.2.*",
-        "phpunit/phpunit"     : "*@stable",
-	    "brianium/paratest"   : "dev-master",
-        "10up/wp_mock"        : "dev-master"
-    }
+	}
 }
