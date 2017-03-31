@@ -69,7 +69,7 @@ function feature_box_summary() {
 ?>
 
 	<p>
-		<?php _e( 'Increase the performance of <a href="http://wp-stream.com/">Stream</a>, as this module stores and retrieves data from within Elasticsearch, not the database.', 'elasticpress-stream' ); ?>
+		<?php _e( 'Use ElasticPress to power <a href="http://wp-stream.com/">Stream</a> with Elasticsearch.', 'elasticpress-stream' ); ?>
 	</p>
 
 <?php
@@ -94,7 +94,7 @@ function feature_box_long() {
 	</p>
 
 	<p>
-		<?php esc_html_e( 'Using the ElasticPress Stream module in conjunction with Stream will speed things up tremendously. All data is stored and retrieved in Elasticsearch, using the ElasticPress API.', 'elasticpress-stream' ); ?>
+		<?php esc_html_e( 'Using the ElasticPress Stream feature in conjunction with Stream will speed things up tremendously. All data is stored and retrieved in Elasticsearch, using the ElasticPress API.', 'elasticpress-stream' ); ?>
 	</p>
 
 <?php
