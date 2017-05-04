@@ -24,6 +24,8 @@ The core Stream plugin stores data in MySQL which after awhile can became bloate
 
 Once the ElasticPress Stream feature has been activated, Stream will start using Elasticsearch instead of MySQL. There are no settings to configure.
 
+*Note: Be sure to consider the security and privacy implications of where detailed site log data is stored. Elasticsearch Stream indices requires POST, PUT, and GET requests properly configured to shield access and tampering from the public.*
+
 ## License
 
 ElasticPress Stream is free software; you can redistribute it and/or modify it under the terms of the [GNU General Public License](http://www.gnu.org/licenses/gpl-2.0.html) as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
