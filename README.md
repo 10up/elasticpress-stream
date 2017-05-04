@@ -5,7 +5,7 @@ Use ElasticPress to power [Stream](https://wordpress.org/plugins/stream/) with E
 
 ## Background
 
-Stream is a WordPress plugin that logs user activity. Every logged-in user action is displayed in an activity stream and organised for easy filtering by User, Role, Context, Action or IP address. Stream is a powerful tool for editorial teams, providing audit trails for potential mistakes and even security breaches.
+Stream is a WordPress plugin that logs user activity. Every logged-in user action is displayed in an activity stream and organized for easy filtering by User, Role, Context, Action or IP address. Stream is a powerful tool for editorial teams, providing audit trails for potential mistakes and even security breaches.
 
 The core Stream plugin stores data in MySQL which after awhile can became bloated and slow. ElasticPress Stream let's you store data in Elasticsearch which is faster as well as off-site which is more secure.
 
@@ -22,7 +22,7 @@ The core Stream plugin stores data in MySQL which after awhile can became bloate
 2. Install [Elasticsearch](https://www.elastic.co/products/elasticsearch) and [ElasticPress](https://wordpress.org/plugins/elasticpress/)
 3. Install ElasticPress Stream. Within the ElasticPress admin dashboard, activate the ElasticPress Stream feature.
 
-Once the ElasticPress Stream feature has been activated, Stream will start using Elasticsearch instead of MySQl. There are no settings to configure.
+Once the ElasticPress Stream feature has been activated, Stream will start using Elasticsearch instead of MySQL. There are no settings to configure.
 
 ## License
 
