@@ -150,7 +150,7 @@ function json_encode( $record ) {
 function get_index_name( $blog_id = null ) {
 	$site_url = get_site_url();
 
-	if ( null === $blog_id ) {
+	if ( ! is_int( $blog_id ) ) {
 		$blog_id = get_current_blog_id();
 
 		if ( defined( 'EP_IS_NETWORK' ) && EP_IS_NETWORK && is_network_admin() ) {
