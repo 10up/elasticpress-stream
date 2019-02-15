@@ -74,4 +74,27 @@ function ep_stream_register_feature() {
 		'post_activation_cb'       => '\ElasticPress\Stream\Core\activation',
 	) );
 }
-add_action( 'ep_setup_features', 'ep_stream_register_feature', 5 );
+add_action( 'elasticpress_loaded', 'ep_stream_register_feature' );
+
+/**
+ * Load our custom driver, if we can.
+ *
+ * @since 1.1.0
+ *
+ * @param string $default_driver Name of default driver class
+ * @return string
+ */
+function ep_stream_filter_driver( $default_driver ) {
+	$feature = function_exists( 'ep_get_registered_feature' ) ? ep_get_registered_feature( 'stream' ) : false;
+
+	// If the Stream DB Driver interface exists, add our custom driver
+	if ( $feature && $feature->is_active() && interface_exists( '\WP_Stream\DB_Driver' ) ) {
+		require_once EPSTREAM_INC . 'classes/class-query.php';
+		require_once EPSTREAM_INC . 'classes/class-db-driver-elasticpress.php';
+
+		return 'ElasticPress\Stream\Driver\DB_Driver_ElasticPress';
+	}
+
+	return $default_driver;
+}
+add_filter( 'wp_stream_db_driver', 'ep_stream_filter_driver' );

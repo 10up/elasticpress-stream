@@ -13,8 +13,7 @@ function setup() {
 		return __NAMESPACE__ . "\\$function";
 	};
 
-	add_action( 'init', $n( 'i18n' ) );\
-	add_filter( 'wp_stream_db_driver', $n( 'driver' ) );
+	add_action( 'init', $n( 'i18n' ) );
 	add_action( 'ep_cli_put_mapping', $n( 'put_mapping' ) );
 	add_action( 'ep_put_mapping', $n( 'put_mapping' ) );
 	add_action( 'wp_stream_no_tables', '__return_true' );
@@ -183,26 +182,6 @@ function get_network_alias() {
 	$alias = $slug . '-global-stream';
 
 	return apply_filters( 'ep_stream_global_alias', $alias );
-}
-
-/**
- * Load our custom driver, if we can.
- *
- * @since 0.1.0
- *
- * @param string $default_driver Name of default driver class
- * @return string
- */
-function driver( $default_driver ) {
-	// If the Stream DB Driver interface exists, add our custom driver
-	if ( interface_exists( '\WP_Stream\DB_Driver' ) ) {
-		require_once EPSTREAM_INC . 'classes/class-query.php';
-		require_once EPSTREAM_INC . 'classes/class-db-driver-elasticpress.php';
-
-		return 'ElasticPress\Stream\Driver\DB_Driver_ElasticPress';
-	}
-
-	return $default_driver;
 }
 
 /**
