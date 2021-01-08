@@ -29,3 +29,7 @@ Once the ElasticPress Stream feature has been activated, Stream will start using
 ## License
 
 ElasticPress Stream is free software; you can redistribute it and/or modify it under the terms of the [GNU General Public License](http://www.gnu.org/licenses/gpl-2.0.html) as published by the Free Software Foundation; either version 2 of the License, or (at your option) any later version.
+
+## Like what you see?
+
+<a href="http://10up.com/contact/"><img src="https://10up.com/uploads/2016/10/10up-Github-Banner.png" width="850" alt="Work with us at 10up"></a>
