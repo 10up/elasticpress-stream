@@ -1,7 +1,8 @@
-ElasticPress Stream
-===========================
+# ElasticPress Stream
 
-Use ElasticPress to power [Stream](https://wordpress.org/plugins/stream/) with Elasticsearch.
+> Use ElasticPress to power [Stream](https://wordpress.org/plugins/stream/) with Elasticsearch.
+
+[![Support Level](https://img.shields.io/badge/support-stable-blue.svg)](#support-level)
 
 ## Background
 
@@ -25,6 +26,10 @@ The core Stream plugin stores data in MySQL which after awhile can became bloate
 Once the ElasticPress Stream feature has been activated, Stream will start using Elasticsearch instead of MySQL. There are no settings to configure.
 
 *Note: Be sure to consider the security and privacy implications of where detailed site log data is stored. Elasticsearch Stream indices requires POST, PUT, and GET requests properly configured to shield access and tampering from the public.*
+
+## Support Level
+
+**Stable:** 10up is not planning to develop any new features for this, but will still respond to bug reports and security concerns. We welcome PRs, but any that include new features should be small and easy to integrate and should not include breaking changes. We otherwise intend to keep this tested up to the most recent version of WordPress.
 
 ## License
 
