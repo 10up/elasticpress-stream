@@ -1,11 +1,13 @@
 {
   "name": "elasticpress-stream",
-  "title": "ElasticPress Stream",
-  "description": "Store Stream data in Elasticsearch, using ElasticPress",
-  "homepage": "http://10up.com/",
+  "version": "1.0.0",
+  "description": "Use ElasticPress to power Stream with Elasticsearch.",
+  "homepage": "https://github.com/10up/elasticpress-stream",
+  "license": "GPL-2.0-or-later",
   "author": {
     "name": "10up Inc",
-    "url": "http://10up.com/"
+    "email": "opensource@10up.com",
+    "url": "https://10up.com/"
   },
   "devDependencies": {
     "grunt": "~0.4.5",
