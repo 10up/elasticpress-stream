@@ -1,14 +1,17 @@
 <?php
 /**
- * Plugin Name: ElasticPress Stream
- * Plugin URI:  http://10up.com
- * Description: ElasticPress Stream
- * Version:     1.0.0
- * Author:      10up, Faishal, Taylor Lovett
- * Author URI:  http://10up.com
- * Text Domain: elasticpress-stream
- * Domain Path: /languages
- * License:     GPL-2.0+
+ * Plugin Name:       ElasticPress Stream
+ * Plugin URI:        https://github.com/10up/elasticpress-stream
+ * Description:       Use ElasticPress to power Stream with Elasticsearch.
+ * Version:           1.0.0
+ * Requires at least: 
+ * Requires PHP:      
+ * Author:            10up, Faishal, Taylor Lovett
+ * Author URI:        https://10up.com
+ * License:           GPL v2 or later
+ * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
+ * Text Domain:       elasticpress-stream
+ * Domain Path:       /languages
  */
 
 /**
