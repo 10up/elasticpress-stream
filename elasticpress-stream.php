@@ -12,6 +12,8 @@
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain:       elasticpress-stream
  * Domain Path:       /languages
+ * Update URI:        https://github.com/10up/elasticpress-stream
+ * 
  */
 
 /**
