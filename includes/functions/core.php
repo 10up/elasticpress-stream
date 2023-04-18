@@ -2,6 +2,8 @@
 
 namespace ElasticPress\Stream\Core;
 
+use ElasticPress\Elasticsearch as ElasticSearch;
+
 /**
  * Default setup routine
  *
@@ -321,7 +323,9 @@ function put_mapping( $blog_id = null ) {
 		'method' => 'PUT',
 	];
 
-	$request = ep_remote_request( $index, $request_args );
+//	$request = ep_remote_request( $index, $request_args );
+	$es      = new ElasticSearch();
+	$request = $es->remote_request( $index, $request_args );
 
 	if ( ! is_wp_error( $request ) && 200 === wp_remote_retrieve_response_code( $request ) ) {
 		$response_body = wp_remote_retrieve_body( $request );
@@ -360,7 +364,9 @@ function create_network_alias( $index ) {
 		'method' => 'POST',
 	];
 
-	$request = ep_remote_request( $path, $request_args );
+//	$request = ep_remote_request( $path, $request_args );
+	$es      = new ElasticSearch();
+	$request = $es->remote_request( $path, $request_args );
 
 	if ( ! is_wp_error( $request ) && ( 200 >= wp_remote_retrieve_response_code( $request ) && 300 > wp_remote_retrieve_response_code( $request ) ) ) {
 		return true;
