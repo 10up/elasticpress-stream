@@ -2,7 +2,9 @@
 
 namespace ElasticPress\Stream\Driver;
 
-use ElasticPress\Elasticsearch as ElasticSearch;
+use ElasticPress\Elasticsearch;
+use ElasticPress\Indexables as Indexables;
+use function ElasticPress\Stream\Core\get_index_name;
 
 class DB_Driver_ElasticPress implements \WP_Stream\DB_Driver {
 	/**
@@ -24,7 +26,7 @@ class DB_Driver_ElasticPress implements \WP_Stream\DB_Driver {
 	 *
 	 * @var \ElasticPress\Elasticsearch
 	 */
-	private $es;
+	protected $es;
 
 	/**
 	 * Class constructor.
@@ -33,8 +35,8 @@ class DB_Driver_ElasticPress implements \WP_Stream\DB_Driver {
 	 */
 	public function __construct() {
 		$this->query      = new Query( $this );
-		$this->index_name = trailingslashit( \ElasticPress\Stream\Core\get_index_name() );
-		$this->es         = new ElasticSearch();
+		$this->index_name = trailingslashit( get_index_name() );
+		$this->es         = new Elasticsearch();
 	}
 
 	/**
@@ -59,7 +61,9 @@ class DB_Driver_ElasticPress implements \WP_Stream\DB_Driver {
 
 			// Insert record meta
 			foreach ( (array) $meta as $meta_key => $meta_values ) {
-				$data['meta'][ $meta_key ] = \EP_API::factory()->prepare_meta_value_types( $meta_values );
+				$indexable                 = Indexables::factory()->get( 'wp_stream_alerts' );
+				$data['meta'][ $meta_key ] = $indexable->prepare_meta_value_types( $meta_values );
+//				$data['meta'][ $meta_key ] = \EP_API::factory()->prepare_meta_value_types( $meta_values );
 			}
 		}
 
@@ -106,7 +110,6 @@ class DB_Driver_ElasticPress implements \WP_Stream\DB_Driver {
 			'blocking' => $blocking,
 		];
 
-//		$request = ep_remote_request( $path, $request_args );
 		$request = $this->es->remote_request( $path, $request_args );
 
 		if ( ! is_wp_error( $request ) ) {
@@ -161,7 +164,7 @@ class DB_Driver_ElasticPress implements \WP_Stream\DB_Driver {
 			],
 		];
 
-		$path = \ElasticPress\Stream\Core\get_index_name() . '/record/_search';
+		$path = get_index_name() . '/record/_search';
 
 		$request_args = [
 			'body'   => \ElasticPress\Stream\Core\json_encode( $formatted_args ),

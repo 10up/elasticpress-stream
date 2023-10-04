@@ -4,8 +4,8 @@
  * Plugin URI:        https://github.com/10up/elasticpress-stream
  * Description:       Use ElasticPress to power Stream with Elasticsearch.
  * Version:           1.0.0
- * Requires at least:
- * Requires PHP:
+ * Requires at least: 5.6
+ * Requires PHP:      7.0
  * Author:            10up, Faishal, Taylor Lovett
  * Author URI:        https://10up.com
  * License:           GPL v2 or later
@@ -57,7 +57,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
 }
 
 /**
- * Register the ElasticPress Stream module.
+ * Register the ElasticPress Stream feature.
  *
  * Only register this if the ElasticPress plugin
  * is active and the ep_register_module function
@@ -66,21 +66,7 @@ if ( defined( 'WP_CLI' ) && WP_CLI ) {
  *
  * @return void
  * @since 0.1.0
- *
  */
-//function ep_stream_register_feature() {
-//	ep_register_feature( 'stream', array(
-//		'title'                    => 'Stream',
-//		'requires_install_reindex' => false,
-//		'setup_cb'                 => '\ElasticPress\Stream\Core\setup',
-//		'feature_box_summary_cb'   => '\ElasticPress\Stream\Core\feature_box_summary',
-//		'feature_box_long_cb'      => '\ElasticPress\Stream\Core\feature_box_long',
-//		'requirements_status_cb'   => '\ElasticPress\Stream\Core\requirements_status_cb',
-//		'post_activation_cb'       => '\ElasticPress\Stream\Core\activation',
-//	) );
-//}
-//add_action( 'ep_setup_features', 'ep_stream_register_feature', 5 );
-
 function ep_stream_register_feature() {
 	if ( class_exists( '\ElasticPress\Features' ) ) {
 		// Include your class file.

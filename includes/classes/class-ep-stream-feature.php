@@ -26,7 +26,7 @@ class Ep_Stream_Feature extends \ElasticPress\Feature {
 
 		$this->requires_install_reindex = false;
 		$this->default_settings         = [
-				'stream_setting' => '',
+			'stream_setting' => '',
 		];
 
 		parent::__construct();
@@ -37,7 +37,7 @@ class Ep_Stream_Feature extends \ElasticPress\Feature {
 	 */
 	public function output_feature_box_summary() {
 		?>
-		<p><?php _e( 'Use ElasticPress to power <a href="http://wp-stream.com/">Stream</a> with Elasticsearch.' ); ?></p>
+		<p><?php _e( 'Use ElasticPress to power <a href="http://wp-stream.com/">Stream</a> with Elasticsearch.', 'elasticpress-stream' ); ?></p>
 		<?php
 	}
 
