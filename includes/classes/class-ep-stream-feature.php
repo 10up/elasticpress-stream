@@ -25,9 +25,7 @@ class Ep_Stream_Feature extends \ElasticPress\Feature {
 		$this->title = esc_html__( 'Stream' );
 
 		$this->requires_install_reindex = false;
-		$this->default_settings         = [
-			'stream_setting' => '',
-		];
+		$this->default_settings         = [ 'stream_setting' => '' ];
 
 		parent::__construct();
 	}
@@ -73,5 +71,4 @@ class Ep_Stream_Feature extends \ElasticPress\Feature {
 		add_action( 'wp_stream_no_tables', '__return_true' );
 		add_action( 'wp_stream_erase_records', '\ElasticPress\Stream\Core\erase_records' );
 	}
-
 }

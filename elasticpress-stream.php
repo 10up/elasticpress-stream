@@ -6,6 +6,7 @@
  * Version:           1.0.0
  * Requires at least: 5.6
  * Requires PHP:      7.0
+ * Requires ElasticPress: 5.0.0
  * Author:            10up, Faishal, Taylor Lovett
  * Author URI:        https://10up.com
  * License:           GPL v2 or later
@@ -43,7 +44,7 @@
 // Useful global constants
 define( 'EPSTREAM_VERSION', '1.0.0' );
 define( 'EPSTREAM_URL', plugin_dir_url( __FILE__ ) );
-define( 'EPSTREAM_PATH', dirname( __FILE__ ) . '/' );
+define( 'EPSTREAM_PATH', __DIR__ . '/' );
 define( 'EPSTREAM_INC', EPSTREAM_PATH . 'includes/' );
 
 // Include core file
@@ -53,7 +54,7 @@ require_once EPSTREAM_INC . 'functions/core.php';
  * WP CLI Commands
  */
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
-	require_once( dirname( __FILE__ ) . '/bin/wp-cli.php' );
+	require_once __DIR__ . '/bin/wp-cli.php';
 }
 
 /**

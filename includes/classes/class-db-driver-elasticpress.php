@@ -3,7 +3,7 @@
 namespace ElasticPress\Stream\Driver;
 
 use ElasticPress\Elasticsearch;
-use ElasticPress\Indexables as Indexables;
+use ElasticPress\Indexables;
 use function ElasticPress\Stream\Core\get_index_name;
 
 class DB_Driver_ElasticPress implements \WP_Stream\DB_Driver {
@@ -63,7 +63,7 @@ class DB_Driver_ElasticPress implements \WP_Stream\DB_Driver {
 			foreach ( (array) $meta as $meta_key => $meta_values ) {
 				$indexable                 = Indexables::factory()->get( 'wp_stream_alerts' );
 				$data['meta'][ $meta_key ] = $indexable->prepare_meta_value_types( $meta_values );
-//				$data['meta'][ $meta_key ] = \EP_API::factory()->prepare_meta_value_types( $meta_values );
+				//              $data['meta'][ $meta_key ] = \EP_API::factory()->prepare_meta_value_types( $meta_values );
 			}
 		}
 
@@ -171,7 +171,7 @@ class DB_Driver_ElasticPress implements \WP_Stream\DB_Driver {
 			'method' => 'POST',
 		];
 
-//		$request = ep_remote_request( $path, $request_args );
+		//      $request = ep_remote_request( $path, $request_args );
 		$request = $this->es->remote_request( $path, $request_args );
 		$result  = [];
 
@@ -227,5 +227,4 @@ class DB_Driver_ElasticPress implements \WP_Stream\DB_Driver {
 	public function purge_storage( $plugin ) {
 		// @TODO: If desired, could delete the Elasticsearch storage here, when the plugin is deactivated.
 	}
-
 }
