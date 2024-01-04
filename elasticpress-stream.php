@@ -4,8 +4,9 @@
  * Plugin URI:        https://github.com/10up/elasticpress-stream
  * Description:       Use ElasticPress to power Stream with Elasticsearch.
  * Version:           1.0.0
- * Requires at least: 
- * Requires PHP:      
+ * Requires at least: 5.6
+ * Requires PHP:      7.0
+ * Requires ElasticPress: 5.0.0
  * Author:            10up, Faishal, Taylor Lovett
  * Author URI:        https://10up.com
  * License:           GPL v2 or later
@@ -13,7 +14,7 @@
  * Text Domain:       elasticpress-stream
  * Domain Path:       /languages
  * Update URI:        https://github.com/10up/elasticpress-stream
- * 
+ *
  */
 
 /**
@@ -43,7 +44,7 @@
 // Useful global constants
 define( 'EPSTREAM_VERSION', '1.0.0' );
 define( 'EPSTREAM_URL', plugin_dir_url( __FILE__ ) );
-define( 'EPSTREAM_PATH', dirname( __FILE__ ) . '/' );
+define( 'EPSTREAM_PATH', __DIR__ . '/' );
 define( 'EPSTREAM_INC', EPSTREAM_PATH . 'includes/' );
 
 // Include core file
@@ -53,30 +54,29 @@ require_once EPSTREAM_INC . 'functions/core.php';
  * WP CLI Commands
  */
 if ( defined( 'WP_CLI' ) && WP_CLI ) {
-	require_once( dirname( __FILE__ ) . '/bin/wp-cli.php' );
+	require_once __DIR__ . '/bin/wp-cli.php';
 }
 
 /**
- * Register the ElasticPress Stream module.
+ * Register the ElasticPress Stream feature.
  *
  * Only register this if the ElasticPress plugin
  * is active and the ep_register_module function
  * is present, meaning ElasticPress is the proper
  * version (>= 2.2).
  *
- * @since 0.1.0
- *
  * @return void
+ * @since 0.1.0
  */
 function ep_stream_register_feature() {
-	ep_register_feature( 'stream', array(
-		'title'                    => 'Stream',
-		'requires_install_reindex' => false,
-		'setup_cb'                 => '\ElasticPress\Stream\Core\setup',
-		'feature_box_summary_cb'   => '\ElasticPress\Stream\Core\feature_box_summary',
-		'feature_box_long_cb'      => '\ElasticPress\Stream\Core\feature_box_long',
-		'requirements_status_cb'   => '\ElasticPress\Stream\Core\requirements_status_cb',
-		'post_activation_cb'       => '\ElasticPress\Stream\Core\activation',
-	) );
+	if ( class_exists( '\ElasticPress\Features' ) ) {
+		// Include your class file.
+		require 'includes/classes/class-ep-stream-feature.php';
+		// Register your feature in ElasticPress.
+		\ElasticPress\Features::factory()->register_feature(
+			new Ep_Stream_Feature()
+		);
+	}
 }
-add_action( 'ep_setup_features', 'ep_stream_register_feature', 5 );
+
+add_action( 'plugins_loaded', 'ep_stream_register_feature', 11 );
